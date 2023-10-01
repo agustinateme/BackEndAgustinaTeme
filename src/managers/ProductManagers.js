@@ -17,6 +17,7 @@ class ProductManager {
             }
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 
@@ -25,11 +26,11 @@ class ProductManager {
             const allProducts = await this.getProducts();
 
             if (allProducts.some(p => p.code === product.code)) {
-                return "You cannot add the product because a product with the same code already exists"
+                throw new Error("You cannot add the product because a product with the same code already exists");
             }
 
             if (!product.title || !product.description || !product.price || !product.status || !product.code || !product.stock || !product.category) {
-                return "All fields are required to add a product."
+                throw new Error("All fields are required to add a product.");
             }
             product.id = allProducts.length === 0 ? 1 : allProducts[allProducts.length - 1].id + 1;
             allProducts.push(product);
@@ -38,6 +39,7 @@ class ProductManager {
 
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 
@@ -47,12 +49,12 @@ class ProductManager {
             const productById = allProducts.find(p => p.id === id);
 
             if (!productById) {
-                console.log("There is no product with the ID entered");
-                return;
+                throw new Error("There is no product with the ID entered");
             }
             return productById;
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 
@@ -62,9 +64,8 @@ class ProductManager {
             const productIndex = allProducts.findIndex(p => p.id === id);
 
             if (productIndex != -1) {
-                //para evitar que al actualizar coloque un código ya existente de otro producto
                 if (allProducts.some(p => p.code === product.code)) {
-                    console.log("You cannot update a product code with an existing one");
+                    throw new Error("You cannot update a product code with an existing one");
                 }
                 else {
                     allProducts[productIndex] = {
@@ -83,11 +84,12 @@ class ProductManager {
                 }
 
             } else {
-                console.log("The ID of the product you are trying to update does not exist. \nTry again");
+                throw new Error("The ID of the product you are trying to update does not exist.");
             }
 
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 
@@ -101,11 +103,12 @@ class ProductManager {
                 await fs.promises.writeFile(this.path, JSON.stringify(allProducts, null, '\t'));
             }
             else {
-                console.log("The ID of the product you are trying to delete does not exist. \nTry again");
+                throw new Error("The ID of the product you are trying to delete does not exist.");
             }
 
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            throw error;
         }
     }
 }

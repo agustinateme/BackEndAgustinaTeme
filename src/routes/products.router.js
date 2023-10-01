@@ -10,48 +10,70 @@ const productManager = new ProductManager(productsFilePath);
 
 
 router.get('/', async (req, res) => {
-    const products = await productManager.getProducts();
-    const cant = req.query.limit;
+    try {
+        const products = await productManager.getProducts();
+        const cant = req.query.limit;
 
-    //si en el path limit no se ingreso nada retorna todos los productos
-    if (!cant) return res.send(products);
+        if (!cant) return res.send(products);
 
-    //si en el path limit no se ingresó un número, retorna un mensaje de error
-    if (isNaN(cant)) return res.status(404).send({ error: 'ingrese un numero' })
+        if (isNaN(cant)) return res.status(404).send({ error: 'ingrese un numero' })
 
-    //creo un objeto con la cantidad pasada en el path de elementos
-    const filteredProducts = products.slice(0, cant);
-    res.send(filteredProducts);
+        const filteredProducts = products.slice(0, cant);
+        res.send(filteredProducts);
+    }
+    catch (error) {
+        res.status(400).send({ error: error.message });
+    }
+    
 })
 
 router.get('/:pid', async (req, res) => {
-    const id = Number(req.params.pid);
-    const product = await productManager.getProductById(id);
-    if (!product) return res.status(404).send({ error: 'producto no encontrado' })
-
-    res.send(product);
+    try {
+        const id = Number(req.params.pid);
+        const product = await productManager.getProductById(id);
+        res.send(product);
+    }
+    catch (error) {
+        res.status(400).send({ error: error.message });
+    }
+   
 });
 
 router.post('/', async (req, res) => {
-    const product = req.body;
-    await productManager.addProduct(product);
-
-    res.send({ status: 'success', payload: product });
+    try {
+        const product = req.body;
+        await productManager.addProduct(product);
+        res.status(200).send({ status: 'success', payload: product });
+    }
+    catch(error) {
+        res.status(400).send({ error: error.message });
+    }
+    
 });
 
 router.put('/:pid', async (req, res) => {
-    const product = req.body;
-    const id = Number(req.params.pid);
-    await productManager.updateProduct(id, product);
+    try {
+        const product = req.body;
+        const id = Number(req.params.pid);
+        await productManager.updateProduct(id, product);
 
-    res.send({ status: 'success', payload: await productManager.getProductById(id) });
+        res.send({ status: 'success', payload: await productManager.getProductById(id) });
+    }
+    catch (error) {
+        res.status(400).send({ error: error.message }); 
+    }
 });
 
 router.delete('/:pid', async (req, res) => {
-    const id = Number(req.params.pid);
-    await productManager.deleteProduct(id);
+    try {
+        const id = Number(req.params.pid);
+        await productManager.deleteProduct(id);
 
-    res.send({ status: 'success'});
+        res.status(200).send({ status: 'success' });
+    }
+    catch (error) {
+        res.status(400).send({ error: error.message }); 
+    }
 });
 
 export default router;

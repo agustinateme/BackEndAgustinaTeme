@@ -44,40 +44,37 @@ class CartManager {
             const cartById = allCarts.find(p => p.id === id);
 
             if (!cartById) {
-                console.log("There is no cart with the ID entered");
-                return;
+                throw new Error(`There is no cart with the ID = ${id} entered`);
             }
             return cartById;
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 
     updateCart = async (idCart, idProduct) => {
         try {
-            //Busco el indice del carrito que me pasan
             const allCarts = await this.getCart();
             const cartIndex = allCarts.findIndex(p => p.id === idCart);
 
-            // Si existe el carrito, busco el índice del producto dentro del carrito
             if (cartIndex !== -1) {
                 const productIndex = allCarts[cartIndex].products.findIndex(product => product.id === idProduct);
 
-                // Si el producto ya existe en el carrito, aumento la cantidad
                 if (productIndex !== -1) {
                     allCarts[cartIndex].products[productIndex].quantity++;
-                } else { // Si no existe, agrego el producto al carrito con cantidad 1
+                } else {
                     allCarts[cartIndex].products.push({ id: idProduct, quantity: 1 });
                 }
 
-                // Guardo los cambios en el archivo
                 await fs.promises.writeFile(this.path, JSON.stringify(allCarts, null, '\t'));
-            } else { // Si el carrito no existe, muestro un mensaje de error
-                console.log("The cart you are trying to update does not exist. \nTry again");
+            } else { 
+                throw new Error("The cart you are trying to update does not exist.");
             }
 
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 }
