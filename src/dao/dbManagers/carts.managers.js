@@ -5,7 +5,6 @@ export default class Carts {
         console.log('Carts database operations are ready.');
     }
 
-    // Usa métodos de clase en lugar de funciones flecha.
     async getCarts() {
         const result = await CartsModel.find().lean();
         return result;
