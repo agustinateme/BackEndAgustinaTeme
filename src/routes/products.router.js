@@ -1,78 +1,86 @@
 import { Router } from "express";
-import ProductManager from '../managers/ProductManagers.js'
-import { __dirname } from "../utils.js";
-import path from 'node:path';
+import Products from '../dao/dbManagers/products.managers.js';
+import { ProductsModel } from '../dao/dbManagers/models/products.models.js';
 
 const router = Router();
-
-const productsFilePath = path.join(__dirname, "./files/products.json");
-const productManager = new ProductManager(productsFilePath);
-
+const productManager = new Products();
 
 router.get('/', async (req, res) => {
+    let { limit = 10, page = 1, sort, query } = req.query;
+    limit = parseInt(limit);
+    page = parseInt(page);
+
+    const options = {
+        page: page,
+        limit: limit,
+        sort: sort ? { price: sort === 'asc' ? 1 : -1 } : {},
+    };
+
+    const filter = query ? { category: query, status: true } : { status: true };
+
     try {
-        const products = await productManager.getProducts();
-        const cant = req.query.limit;
-
-        if (!cant) return res.send(products);
-
-        if (isNaN(cant)) return res.status(404).send({ error: 'ingrese un numero' })
-
-        const filteredProducts = products.slice(0, cant);
-        res.send(filteredProducts);
+        const result = await ProductsModel.paginate(filter, options);
+        res.send({
+            status: 'success',
+            payload: {
+                docs: result.docs,
+                totalPages: result.totalPages,
+                prevPage: result.hasPrevPage ? result.prevPage : null,
+                nextPage: result.hasNextPage ? result.nextPage : null,
+                page: result.page,
+                hasPrevPage: result.hasPrevPage,
+                hasNextPage: result.hasNextPage,
+                prevLink: result.hasPrevPage ? `/products?limit=${limit}&page=${result.prevPage}&sort=${sort}&query=${query}` : null,
+                nextLink: result.hasNextPage ? `/products?limit=${limit}&page=${result.nextPage}&sort=${sort}&query=${query}` : null
+            }
+        });
+    } catch (error) {
+        res.send({ status: 'error', payload: { message: error.message } });
     }
-    catch (error) {
-        res.status(400).send({ error: error.message });
-    }
-    
-})
+});
 
 router.get('/:pid', async (req, res) => {
     try {
-        const id = Number(req.params.pid);
+        const id = req.params.pid;
         const product = await productManager.getProductById(id);
-        res.send(product);
+        res.send({ status: 'success', payload: product });
     }
     catch (error) {
-        res.status(400).send({ error: error.message });
+        res.status(500).send({ status: 'error', error: error.message });
     }
-   
 });
 
 router.post('/', async (req, res) => {
     try {
         const product = req.body;
         await productManager.addProduct(product);
-        res.status(200).send({ status: 'success', payload: product });
+        res.send({ status: 'success', payload: product });
     }
-    catch(error) {
+    catch (error) {
         res.status(400).send({ error: error.message });
     }
-    
+
 });
 
 router.put('/:pid', async (req, res) => {
     try {
-        const product = req.body;
-        const id = Number(req.params.pid);
+
+        const { title, description, price, thumbnail, code, stock, status, category } = req.body;
+
+        if (!title || !description || !price || !code || !stock || !status || !category) {
+            return res.status(400).send({ status: 'error', message: 'incomplete values' });
+        }
+
+        const product = { title, description, price, thumbnail, code, stock, status, category };
+
+        const id = req.params.pid;
+
         await productManager.updateProduct(id, product);
 
-        res.send({ status: 'success', payload: await productManager.getProductById(id) });
+        res.send({ status: 'success', payload: product });
     }
     catch (error) {
-        res.status(400).send({ error: error.message }); 
-    }
-});
-
-router.delete('/:pid', async (req, res) => {
-    try {
-        const id = Number(req.params.pid);
-        await productManager.deleteProduct(id);
-
-        res.status(200).send({ status: 'success' });
-    }
-    catch (error) {
-        res.status(400).send({ error: error.message }); 
+        res.status(400).send({ error: error.message });
     }
 });
 
