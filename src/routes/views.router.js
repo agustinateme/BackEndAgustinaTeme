@@ -35,6 +35,27 @@ router.get('/products', async (req, res) => {
     }
 });
 
+// Ruta para ver detalles de un producto
+router.get('/products/:productId', async (req, res) => {
+    try {
+        const productId = req.params.productId;
+        const product = await ProductsModel.findById(productId);
+
+        if (!product) {
+            return res.status(404).render('error', { message: 'Producto no encontrado.' });
+        }
+
+        // Convertir el documento de Mongoose a un objeto JavaScript plano
+        const productObject = product.toObject();
+
+        // Renderizar la vista de detalles del producto con la información del producto
+        res.render('productDetails', { product: productObject });
+    } catch (error) {
+        res.status(500).render('error', { message: 'Error al recuperar los detalles del producto.' });
+    }
+});
+
+
 
 // Ruta para mostrar un carrito específico con sus productos
 router.get('/carts/:cid', async (req, res) => {
@@ -60,6 +81,58 @@ router.get('/carts/:cid', async (req, res) => {
     } catch (error) {
         res.status(500).render('error', { message: 'Error al cargar el carrito.' });
     }
+});
+
+
+// Ruta para añadir productos al carrito PROBANDO...
+router.post('/carts/:cartId/products/:productId', async (req, res) => {
+    try {
+        const { cartId, productId } = req.params;
+        const { quantity } = req.body;
+
+        const cart = await CartsModel.findOne({ _id: cartId, userId: req.session.user._id });
+        if (!cart) {
+            return res.status(404).send('Carrito no encontrado o no pertenece al usuario.');
+        }
+        // Encuentra el producto y añádelo al carrito
+        const product = await ProductsModel.findById(productId);
+        if (!product) {
+            return res.status(404).send('Producto no encontrado.');
+        }
+
+        // Añade el producto al carrito
+        cart.products.push({ product: productId, quantity });
+        await cart.save();
+
+        res.status(200).send({ message: 'Producto añadido al carrito', cartId: cart._id });
+    } catch (error) {
+        res.status(500).send('Error al añadir el producto al carrito.');
+    }
+});
+
+
+const publicAccess = (req, res, next) => {
+    if (req.session?.user) return res.redirect('/');
+    next();
+}
+
+const privateAccess = (req, res, next) => {
+    if (!req.session?.user) return res.redirect('/login');
+    next();
+}
+
+router.get('/register', publicAccess, (req, res) => {
+    res.render('register')
+});
+
+router.get('/login', publicAccess, (req, res) => {
+    res.render('login')
+});
+
+router.get('/', privateAccess, (req, res) => {
+    res.render('profile', {
+        user: req.session.user
+    })
 });
 
 /*

@@ -2,11 +2,10 @@
 <div>
     {{#each products}}
     <div>
+        <img src="{{this.thumbnail}}" alt="{{this.title}}">
         <h2>{{this.title}}</h2>
-        <p>{{this.description}}</p>
         <p>${{this.price}}</p>
-        <p>Categoría: {{this.category}}</p>
-        <button data-product-id="{{this._id}}" class="add-to-cart-btn">Agregar al Carrito</button>
+        <a href="/products/{{this._id}}" class="view-details-btn">Ver Detalles</a>
     </div>
     {{/each}}
 </div>
