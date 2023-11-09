@@ -44,7 +44,7 @@ const startServer = async () => {
     try {
         await mongoose.connect('mongodb+srv://agustinateme:UhG9PZuj78uc6KEV@basededatosecommerce.qngt7vp.mongodb.net/?retryWrites=true&w=majority');
         console.log('DB connected');
-        app.listen(3000, () => console.log('Server running'));
+        app.listen(8080, () => console.log('Server running'));
     }
     catch (error) {
         console.error('DB connection failed', error.message);
