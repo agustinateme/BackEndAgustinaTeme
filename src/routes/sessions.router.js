@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import usersModel from '../dao/dbManagers/models/users.models.js';
-import { CartsModel } from '../dao/dbManagers/models/carts.models.js';
+import Carts from '../dao/dbManagers/carts.managers.js'
 
 const router = Router();
+
+const cartManager = new Carts();
 
 router.post('/register', async (req, res) => {
     try {
@@ -32,6 +34,16 @@ router.post('/register', async (req, res) => {
     }
 });
 
+function auth(req, res, next) {
+    const user = req.session?.user;
+
+    if (user && user.rol === 'admin') {
+        return next(); 
+    }
+
+    return res.status(401).send('Error de validación de permisos');
+}
+
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -41,7 +53,7 @@ router.post('/login', async (req, res) => {
             // Usuario autenticado
             if (!user.cart) {
                 // Si no hay carrito, crea uno nuevo
-                const cart = await CartsModel.create({ userId: user._id, products: [] });
+                const cart = await cartManager.addCart();
                 // Asigna el ID del carrito al usuario
                 user.cart = cart._id;
                 await user.save();
@@ -49,7 +61,7 @@ router.post('/login', async (req, res) => {
 
             // Almacena el ID del carrito en la sesión
             req.session.cartId = user.cart._id;
-            req.session.user = { id: user._id, name: `${user.first_name} ${user.last_name}` };
+            req.session.user = { id: user._id, name: `${user.first_name} ${user.last_name}`, email: user.email, age: user.age, rol: user.rol };
 
             res.status(200).json({ status: 'success', message: 'Login successful', cartId: user.cart._id });
         } else {
