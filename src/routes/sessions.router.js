@@ -1,8 +1,13 @@
 import { Router } from 'express';
 import usersModel from '../dao/dbManagers/models/users.models.js';
-import Carts from '../dao/dbManagers/carts.managers.js'
+import Carts from '../dao/dbManagers/carts.managers.js';
+import passport from 'passport';
+import { createHash, isValidPassword } from '../utils.js';
+
+
 
 const router = Router();
+
 
 const cartManager = new Carts();
 
@@ -19,13 +24,15 @@ router.post('/register', async (req, res) => {
         if (exists) {
             return res.status(400).send({ status: 'error', message: 'user already exists' });
         }
-
+        console.log( password);
+        const hashedPassword = createHash(password);
+       
         await usersModel.create({
             first_name,
             last_name,
             email,
             age,
-            password
+            password: hashedPassword
         })
 
         res.status(201).send({ status: 'success', message: 'user registered' });
@@ -47,9 +54,9 @@ function auth(req, res, next) {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await usersModel.findOne({ email, password }).populate('cart');
+        const user = await usersModel.findOne({ email }).populate('cart');
 
-        if (user) {
+        if (user && isValidPassword(password, user.password)) {
             // Usuario autenticado
             if (!user.cart) {
                 // Si no hay carrito, crea uno nuevo
@@ -82,5 +89,15 @@ router.get('/logout', (req, res) => {
         res.redirect('/');
     })
 })
+
+
+router.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => {
+    res.send({ status: 'success', message: 'user registered' });
+});
+
+router.get('/github-callback', passport.authenticate('github', { failureRedirect: '/login' }), async (req, res) => {
+    req.session.user = req.user;
+    res.redirect('/');
+});
 
 export default router;

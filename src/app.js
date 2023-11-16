@@ -7,7 +7,9 @@ import handlebars from 'express-handlebars';
 import mongoose from 'mongoose';
 import MongoStore from 'connect-mongo';
 import session from 'express-session';
-import __dirname from './utils.js';
+import { __dirname } from './utils.js';
+import { initializePassport } from './config/passport.config.js';
+import passport from 'passport';
 
 const app = express();
 
@@ -27,11 +29,19 @@ app.use(session({
     secret: 'Coder5575Secret',
     resave: false,
     saveUninitialized: true,
-    cookie: {
-        secure: false, 
-        maxAge: 3600000 
-    }
+   // cookie: {
+     //   secure: false, 
+   //     maxAge: 3600000 
+   // } 
 }));
+
+//Passport config
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use('/', viewsRouter);
+app.use('/api/sessions', sessionsRouter);
 
 app.use('/', viewsRouter);
 app.use('/api/products', productsRouter);
