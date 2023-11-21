@@ -1,95 +1,105 @@
 import { Router } from 'express';
-import usersModel from '../dao/dbManagers/models/users.models.js';
-import Carts from '../dao/dbManagers/carts.managers.js';
 import passport from 'passport';
+import LocalStrategy from 'passport-local';
+import bcrypt from 'bcrypt';
+import usersModel from '../dao/dbManagers/models/users.models.js';
 import { createHash, isValidPassword } from '../utils.js';
-
-
 
 const router = Router();
 
+// Configuración de la estrategia local de Passport
+passport.use(
+    new LocalStrategy(
+        {
+            usernameField: 'email',
+            passwordField: 'password',
+        },
+        async (email, password, done) => {
+            try {
+                const user = await usersModel.findOne({ email });
 
-const cartManager = new Carts();
+                if (!user) {
+                    return done(null, false, { message: 'Usuario no encontrado' });
+                }
 
+                const isPasswordValid = await bcrypt.compare(password, user.password);
+
+                if (!isPasswordValid) {
+                    return done(null, false, { message: 'Contraseña incorrecta' });
+                }
+
+                return done(null, user);
+            } catch (error) {
+                return done(error);
+            }
+        }
+    )
+);
+
+// Serialización y deserialización del usuario
+passport.serializeUser((user, done) => {
+    done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await usersModel.findById(id);
+        done(null, user);
+    } catch (error) {
+        done(error);
+    }
+});
+
+// Ruta para el registro (usando Passport)
 router.post('/register', async (req, res) => {
     try {
         const { first_name, last_name, email, age, password } = req.body;
 
+        // Validaciones de campos
         if (!first_name || !last_name || !email || !age || !password) {
-            return res.status(422).send({ status: 'error', message: 'incomplete values' });
+            return res.status(422).send({ status: 'error', message: 'Valores incompletos' });
         }
 
         const exists = await usersModel.findOne({ email });
 
         if (exists) {
-            return res.status(400).send({ status: 'error', message: 'user already exists' });
+            return res.status(400).send({ status: 'error', message: 'El usuario ya existe' });
         }
-        console.log( password);
+
         const hashedPassword = createHash(password);
-       
+
         await usersModel.create({
             first_name,
             last_name,
             email,
             age,
-            password: hashedPassword
-        })
+            password: hashedPassword,
+        });
 
-        res.status(201).send({ status: 'success', message: 'user registered' });
+        res.status(201).send({ status: 'success', message: 'Usuario registrado' });
     } catch (error) {
-        res.status(500).send({ status: 'error', message: error.message })
+        res.status(500).send({ status: 'error', message: error.message });
     }
 });
 
-function auth(req, res, next) {
-    const user = req.session?.user;
-
-    if (user && user.rol === 'admin') {
-        return next(); 
-    }
-
-    return res.status(401).send('Error de validación de permisos');
-}
-
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await usersModel.findOne({ email }).populate('cart');
-
-        if (user && isValidPassword(password, user.password)) {
-            // Usuario autenticado
-            if (!user.cart) {
-                // Si no hay carrito, crea uno nuevo
-                const cart = await cartManager.addCart();
-                // Asigna el ID del carrito al usuario
-                user.cart = cart._id;
-                await user.save();
-            }
-
-            // Almacena el ID del carrito en la sesión
-            req.session.cartId = user.cart._id;
-            req.session.user = { id: user._id, name: `${user.first_name} ${user.last_name}`, email: user.email, age: user.age, rol: user.rol };
-
-            res.status(200).json({ status: 'success', message: 'Login successful', cartId: user.cart._id });
-        } else {
-            // Autenticación fallida
-            res.status(401).json({ success: false, message: 'Authentication failed' });
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
-    }
+// Ruta para el inicio de sesión (usando Passport)
+router.post('/login', passport.authenticate('local', {
+    failureRedirect: '/login',
+    failureFlash: true,
+}), (req, res) => {
+    req.session.user = req.user; 
+    res.redirect('/products');
 });
 
-
-
+// Ruta para cerrar sesión
 router.get('/logout', (req, res) => {
-    req.session.destroy(error => {
-        if (error) return res.status(500).send({ status: 'error', message: error.message });
+    req.logout(function (err) {
+        if (err) {
+            return res.status(500).send({ status: 'error', message: err.message });
+        }
         res.redirect('/');
-    })
-})
-
+    });
+});
 
 router.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => {
     res.send({ status: 'success', message: 'user registered' });

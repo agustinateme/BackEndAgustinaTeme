@@ -4,7 +4,6 @@ import {CartsModel} from '../dao/dbManagers/models/carts.models.js';
 
 const router = express.Router();
 
-// Ruta para mostrar los productos con paginación
 router.get('/products', async (req, res) => {
     let { page = 1, limit = 10 } = req.query;
     page = parseInt(page, 10);
@@ -19,6 +18,8 @@ router.get('/products', async (req, res) => {
         };
 
         const result = await ProductsModel.paginate({}, options);
+
+        console.log("Datos de usuario:", req.session.user);
 
         res.render('products', {
             user: req.session.user,
@@ -35,6 +36,7 @@ router.get('/products', async (req, res) => {
         res.status(500).render('error', { message: 'Error al cargar la lista de productos.' });
     }
 });
+
 
 // Ruta para ver detalles de un producto
 router.get('/products/:productId', async (req, res) => {
