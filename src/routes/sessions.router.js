@@ -1,12 +1,10 @@
 import { Router } from 'express';
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
-import bcrypt from 'bcrypt';
 import usersModel from '../dao/dbManagers/models/users.models.js';
-import { createHash, isValidPassword } from '../utils.js';
 
 const router = Router();
-
+/*
 // Configuración de la estrategia local de Passport
 passport.use(
     new LocalStrategy(
@@ -35,6 +33,7 @@ passport.use(
         }
     )
 );
+*/
 
 // Serialización y deserialización del usuario
 passport.serializeUser((user, done) => {
@@ -47,38 +46,6 @@ passport.deserializeUser(async (id, done) => {
         done(null, user);
     } catch (error) {
         done(error);
-    }
-});
-
-// Ruta para el registro (usando Passport)
-router.post('/register', async (req, res) => {
-    try {
-        const { first_name, last_name, email, age, password } = req.body;
-
-        // Validaciones de campos
-        if (!first_name || !last_name || !email || !age || !password) {
-            return res.status(422).send({ status: 'error', message: 'Valores incompletos' });
-        }
-
-        const exists = await usersModel.findOne({ email });
-
-        if (exists) {
-            return res.status(400).send({ status: 'error', message: 'El usuario ya existe' });
-        }
-
-        const hashedPassword = createHash(password);
-
-        await usersModel.create({
-            first_name,
-            last_name,
-            email,
-            age,
-            password: hashedPassword,
-        });
-
-        res.status(201).send({ status: 'success', message: 'Usuario registrado' });
-    } catch (error) {
-        res.status(500).send({ status: 'error', message: error.message });
     }
 });
 

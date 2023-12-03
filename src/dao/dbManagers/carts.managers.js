@@ -5,60 +5,79 @@ export default class Carts {
         console.log('Carts database operations are ready.');
     }
 
-    async getCarts() {
-        const result = await CartsModel.find().lean();
+    //Devuelve todos los carritos
+    getAll = async () => {
+        const carts = await CartsModel.find().lean();
+        return carts;
+    }
+
+    //Crea un carrito
+    addCart = async (cart) => {
+        const result = await CartsModel.create(cart);
         return result;
     }
 
-    async addCart() {
-        const result = await CartsModel.create({});
+    //Obtiene un carrito por su id
+    getById = async (id) => {
+        const cart = await CartsModel.findById(id);
+        return cart;
+    }
+
+    //Actualiza los productos del carrito pasado por id
+    updateCart = async (id, product) => {
+        const result = await CartsModel.updateOne({ _id: id }, product);
         return result;
     }
 
-    getCartById(id) {
-        return CartsModel.findById(id);
+    //Actualiza la cantidad del producto seleccionado del carrito elegido
+    updateProductQuantity = async (cartId, productId, newQuantity) => {
+        try {
+            const cart = await CartsModel.findById(cartId);
+            if (!cart) {
+                throw new Error('Cart not found');
+            }
+
+            const productIndex = cart.products.findIndex(p => p.product.toString() === productId);
+            if (productIndex === -1) {
+                throw new Error('Product not found in cart');
+            }
+
+            cart.products[productIndex].quantity = newQuantity;
+            const result = await cart.save();
+            return result;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
 
-    async deleteProduct(cid, pid) {
+    //Elimina el carrito pasado por id
+    deleteCart = async (id) => {
+        const cart = await CartsModel.findByIdAndDelete(id);
+        return cart;
+    }
+
+    //Elimina un producto seleccionado del carrito seleccionado
+    deleteProduct = async (cid, pid) => {
         const result = await CartsModel.updateOne(
             { _id: cid },
             { $pull: { products: { product: pid } } }
         );
         return result;
-    }
+    }    
 
-    async updateCartWithProducts(cartId, productsToUpdate) {
-        // Encuentra el carrito y actualízalo con el nuevo arreglo de productos
-        const updatedCart = await CartsModel.findByIdAndUpdate(
-            cartId,
-            { $set: { products: productsToUpdate } },
-            { new: true, runValidators: true }
-        );
+    // Elimina todos los productos del carrito
+    deleteAllProducts = async (cartId) => {
+        try {
+            const cart = await CartsModel.findById(cartId);
+            if (!cart) {
+                throw new Error('Cart not found');
+            }
 
-        return updatedCart;
-    }
-
-    async updateCart(id, products) {
-        // Esta operación encuentra un carrito por ID y actualiza sus productos.
-        const updatedCart = await CartsModel.findOneAndUpdate(
-            { _id: id },
-            { $set: { products: products } },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedCart) {
-            throw new Error("The cart was not found or no update was made.");
+            cart.products = [];
+            const result = await cart.save();
+            return result;
+        } catch (error) {
+            throw new Error(error.message);
         }
-
-        return updatedCart;
-    }
-
-    async deleteCart(id) {
-        const cart = await CartsModel.findById(id);
-        if (!cart) {
-            throw new Error("The cart you are trying to delete does not exist.");
-        }
-        const result = await CartsModel.deleteOne({ _id: id });
-        return result;
     }
 }
