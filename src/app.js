@@ -28,12 +28,13 @@ app.engine('handlebars', handlebars.engine());
 app.set('views', `${__dirname}/views`);
 app.set('view engine', 'handlebars');
 
+app.use('/api/sessions', sessionsRouter);
+
 app.use('/', viewsRouter.getRouter());
 app.use('/api/products', productsRouter.getRouter());
 app.use('/api/carts', cartsRouter.getRouter());
 app.use('/api/users', usersRouter.getRouter());
 
-// app.use('/api/sessions', sessionsRouter);
 
 try {
     await mongoose.connect('mongodb+srv://agustinateme:UhG9PZuj78uc6KEV@basededatosecommerce.qngt7vp.mongodb.net/?retryWrites=true&w=majority');

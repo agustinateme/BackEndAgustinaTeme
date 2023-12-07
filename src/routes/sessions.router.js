@@ -1,10 +1,28 @@
 import { Router } from 'express';
-import passport from 'passport';
-import LocalStrategy from 'passport-local';
 import usersModel from '../dao/dbManagers/models/users.models.js';
+import express from 'express';
+import passport from 'passport';
+import { accessRolesEnum } from '../config/enums.js';
+
+const router = express.Router();
+
+router.get('/current', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.status(200).json({ user: req.user });
+    } else {
+        res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+});
+
+
+/*
+
 
 const router = Router();
-/*
+
+
+
+
 // Configuración de la estrategia local de Passport
 passport.use(
     new LocalStrategy(
