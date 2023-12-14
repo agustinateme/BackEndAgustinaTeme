@@ -10,6 +10,8 @@ import ProductsRouter from './routes/products.router.js';
 import CartsRouter from './routes/carts.router.js';
 import ViewsRouter from './routes/views.router.js';
 
+import './dao/dbConfig.js';
+
 const app = express();
 
 const viewsRouter = new ViewsRouter();
@@ -35,13 +37,13 @@ app.use('/api/products', productsRouter.getRouter());
 app.use('/api/carts', cartsRouter.getRouter());
 app.use('/api/users', usersRouter.getRouter());
 
-
+/* YA LO TENGO  EN DBCONFIG.JS
 try {
     await mongoose.connect('mongodb+srv://agustinateme:UhG9PZuj78uc6KEV@basededatosecommerce.qngt7vp.mongodb.net/?retryWrites=true&w=majority');
     console.log('DB connected');
 }
 catch (error) {
     console.log(error.message);
-}
+}*/
     
 app.listen(8080, () => console.log('Server running'));
