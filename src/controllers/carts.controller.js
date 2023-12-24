@@ -5,7 +5,8 @@ import {
     deleteProduct as deleteProductService,
     deleteAllProducts as deleteAllProductsService,
     updateAllProducts as updateAllProductsService,
-    updateQuantity as updateQuantityService
+    updateQuantity as updateQuantityService,
+    purchase as purchaseService
 } from '../services/carts.services.js';
 
 
@@ -93,7 +94,18 @@ const updateQuantity = async (req, res) => {
     }
 }
 
+const purchase = async (req, res) => {
+    try {
+        const { cid } = req.params;
+        const { user } = req.user;
 
+        const result = await purchaseService(cid, user);
+
+        res.send({ result });
+    } catch (error) {
+        res.status(500).send()
+    }
+}
 
 export {
     addCart,

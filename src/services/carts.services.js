@@ -58,6 +58,34 @@ const updateQuantity = async (idCart, idProduct, newQuantity) => {
     return updatedCart;
 }
 
+const purchase = async (cid, user) => {
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    let amount = 0;
+
+    const outStock = [];
+
+    cart.products.forEach(async ({ product, quantity }) => {
+        if (product.stock >= quantity) {
+            amount += product.price * quantity;
+            product.stock -= quantity;
+            await productsReposity.updateById('Id del producto', product)
+        } else {
+            outStock.push({ product, quantity });
+        }
+    });
+
+    const ticket = await ticketsService.generatePurchase(user, amount);
+    await cartsRepository.updateProducts(cid, outStock);
+
+    await session.commitTransaction();
+
+    await session.abortTransaction();
+    session.endSession();
+}
+
 export {
     addCart,
     getCartById,
@@ -65,5 +93,6 @@ export {
     deleteProduct,
     deleteAllProducts,
     updateAllProducts,
-    updateQuantity
+    updateQuantity,
+    purchase
 }
