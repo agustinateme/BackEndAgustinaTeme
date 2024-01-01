@@ -1,5 +1,5 @@
-import Carts from '../dao/memoryManager/carts.managers.js';
-import Products from '../dao/memoryManager/products.managers.js';
+import Carts from '../dao/mongo/carts.mongo.js';
+import Products from '../dao/mongo/products.mongo.js';
 
 const cartsManager = new Carts();
 const productsManager = new Products();

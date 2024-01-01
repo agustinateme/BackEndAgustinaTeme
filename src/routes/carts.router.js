@@ -1,21 +1,26 @@
-import Router from './router.js';
-import Carts from '../dao/memoryManager/carts.managers.js';
-import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
-import { addCart, getCartById, addProduct, deleteProduct, deleteAllProducts, updateAllProducts, updateQuantity } from '../controllers/carts.controller.js';
+import { Router } from 'express';
+import {Carts} from '../dao/factory.js';
+import { getCartById, addProduct, deleteProduct, deleteAllProducts, updateAllProducts, updateQuantity } from '../controllers/carts.controller.js';
 
-export default class CartsRouter extends Router {
-    constructor() {
-        super();
-        this.cartManager = new Carts();
-    }
+const router = Router();
+const cartsDao = new Carts();
 
-    init() {
-        this.post('/', [accessRolesEnum.USER], passportStrategiesEnum.JWT, this.addCart);
-        this.get('/:cid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, this.getCartById);
-        this.post('/:cid/product/:pid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, this.addProduct);
-        this.delete('/:cid/products/:pid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, this.deleteProduct);
-        this.put('/:cid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, this.updateAllProducts);
-        this.put('/:cid/products/:pid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, this.updateQuantity);
-        this.delete('/:cid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, this.deleteAllProducts);
-    }  
-}
+router.post('/', async (req, res) => {
+    const cart = [];
+    const data = await cartsDao.addCart(cart);
+    res.json(data);
+})
+
+router.get('/', async (req, res) => {
+    const data = await cartsDao.getCartById();
+    res.json(data);
+})
+
+router.get('/:cid', getCartById);
+router.post('/:cid/product/:pid', addProduct);
+router.delete('/:cid/products/:pid', deleteProduct);
+router.put('/:cid', updateAllProducts);
+router.put('/:cid/products/:pid', updateQuantity);
+router.delete('/:cid', deleteAllProducts);
+
+export default router;

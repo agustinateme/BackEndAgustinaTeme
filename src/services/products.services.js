@@ -1,4 +1,4 @@
-import Products from '../dao/memoryManager/products.managers.js';
+import Products from '../dao/mongo/products.mongo.js';
 
 const productsManager = new Products();
 

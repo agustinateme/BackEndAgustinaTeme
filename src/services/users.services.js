@@ -1,4 +1,4 @@
-import Users from '../dao/memoryManager/users.manager.js';
+import Users from '../dao/mongo/users.mongo.js';
 import { createHash, generateToken, isValidPassword } from '../utils.js';
 
 const usersManager = new Users();

@@ -1,0 +1,10 @@
+[
+    {
+        "password": "$2b$10$tJqnpH9TV6LiAuhWs2gdZ.yGK2k94sL42D3qqT99vGx5YW46D.7.K",
+        "name": "prueba 1",
+        "email": "p1@a.com",
+        "role": "user",
+        "age": 45,
+        "cart": "1"
+    }
+]

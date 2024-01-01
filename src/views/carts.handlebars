@@ -1,8 +1,11 @@
 <h1>CARRITO</h1>
-{{#each products}}
 <div>
-    <h2>{{this.product.title}}</h2>
-    <p>Cantidad: {{this.quantity}}</p>
-    <p>Subtotal: ${{this.subtotal}}</p>
+    {{#each products}}
+    <div>
+        <h2>{{this.product.title}}</h2>
+        <p>Cantidad: {{this.product.quantity}}</p>
+        <p>precio: ${{this.price}}</p>
+    </div>
+    {{/each}}
 </div>
-{{/each}}
+

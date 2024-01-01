@@ -114,5 +114,5 @@ export {
     deleteProduct,
     deleteAllProducts,
     updateAllProducts,
-    updateQuantity
+    updateQuantity,
 }

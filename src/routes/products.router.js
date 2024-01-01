@@ -1,18 +1,30 @@
-import Router from './router.js';
-import Products from '../dao/memoryManager/products.managers.js';
-import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
+import { Router } from 'express';
+import {Products} from '../dao/factory.js';
 import { getProducts, getProductById, addProduct, updateProduct, deleteProduct} from '../controllers/products.controller.js';
 
-export default class ProductsRouter extends Router {
-    constructor() {
-        super();
-        this.productsManager = new Products; 
-    }
+const router = Router();
+const productsDao = new Products();
 
-    init() {
-        this.get('/', [accessRolesEnum.USER], passportStrategiesEnum.JWT, this.getProducts);
-        this.get('/:pid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, this.getProductById);
-        this.post('/', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, this.addProduct);
-        this.put('/:pid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, this.updateProduct);
-    }
-}
+router.get('/', async (req, res) => {
+    const data = await productsDao.getProducts();
+    res.json(data);
+});
+
+router.post('/', async (req, res) => {
+    const { title, description, price, category, stock, quantity } = req.body;
+    const data = await productsDao.addProduct({
+        title,
+        description,
+        price,
+        category,
+        stock,
+        quantity,
+    });
+    res.json(data);
+});
+
+router.get('/:pid', getProductById);
+router.put('/:pid', updateProduct);
+router.delete('/:pid', deleteProduct)
+
+export default router;
