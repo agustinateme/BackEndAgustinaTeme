@@ -26,10 +26,10 @@ export default class Products {
     //Verifica si un producto está en stock 
     //PRE: El producto existe
     isInStock = async (prodId) => {
-    const product = await ProductsModel.findById(prodId);
-    if (product.stock === 0) return false;
-    return true;
-}
+        const product = await ProductsModel.findById(prodId);
+        if (product.stock === 0) return false;
+        return true;
+    }
 
     //Agrega un producto
     addProduct = async (product) => {
