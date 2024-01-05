@@ -1,11 +1,21 @@
-<h1>CARRITO</h1>
-<div>
+<!-- cart.handlebars -->
+<h2>CART {{cartId}}</h2>
+
+<div style="display: flex; gap: 10px;">
     {{#each products}}
-    <div>
-        <h2>{{this.product.title}}</h2>
-        <p>Cantidad: {{this.product.quantity}}</p>
-        <p>precio: ${{this.price}}</p>
+    <div class="product">
+        <p>title : {{this.title}}
+        <p>description : {{this.description}}</p>
+        <p>code : {{this.code}}</p>
+        <p>price : {{this.price}}</p>
+        <p>status : {{this.status}}</p>
+        <p>stock : {{this.stock}}</p>
+        <p>category : {{this.category}}</p>
+        <p>thumbnail : {{this.thumbnail}}</p>
+        </p>
+        <p>Cantidad: {{this.quantity}}</p>
+
+        <p>Product: {{this.product}}</p>
     </div>
     {{/each}}
 </div>
-

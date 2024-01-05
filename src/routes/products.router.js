@@ -1,30 +1,28 @@
-import { Router } from 'express';
-import {Products} from '../dao/factory.js';
+import Router from './router.js';
+import Products from '../dao/memoryManager/products.managers.js';
+import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
 import { getProducts, getProductById, addProduct, updateProduct, deleteProduct} from '../controllers/products.controller.js';
 
-const router = Router();
-const productsDao = new Products();
+export default class ProductsRouter extends Router {
+    constructor() {
+        super();
+        this.productsManager = new Products(); 
+    }
 
-router.get('/', async (req, res) => {
-    const data = await productsDao.getProducts();
-    res.json(data);
-});
+    init() {
+        //Lista todos los productos de la base
+        this.get('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, getProducts);
 
-router.post('/', async (req, res) => {
-    const { title, description, price, category, stock, quantity } = req.body;
-    const data = await productsDao.addProduct({
-        title,
-        description,
-        price,
-        category,
-        stock,
-        quantity,
-    });
-    res.json(data);
-});
+        //Trae solo el producto con el id proporcionado
+        this.get('/:pid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, getProductById);
 
-router.get('/:pid', getProductById);
-router.put('/:pid', updateProduct);
-router.delete('/:pid', deleteProduct)
+        //Agrega un producto
+        this.post('/', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, addProduct);
 
-export default router;
+        //Toma un producto y lo atualiza por los campos enviados desde el body
+        this.put('/:pid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, updateProduct);
+
+        //Elimina el producto con el id indicado
+        this.delete(':/pid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, deleteProduct);
+    }
+}

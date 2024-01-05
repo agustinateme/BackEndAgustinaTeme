@@ -1,26 +1,38 @@
-import { Router } from 'express';
-import {Carts} from '../dao/factory.js';
-import { getCartById, addProduct, deleteProduct, deleteAllProducts, updateAllProducts, updateQuantity } from '../controllers/carts.controller.js';
+import Router from './router.js';
+import Carts from '../dao/memoryManager/carts.managers.js';
+import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
+import { addCart, getCartById, addProduct, deleteProduct, deleteAllProducts, updateAllProducts, updateQuantity } from '../controllers/carts.controller.js';
+import { processPurchase } from "../controllers/tickets.controller.js";
 
-const router = Router();
-const cartsDao = new Carts();
+export default class CartsRouter extends Router {
+    constructor() {
+        super();
+        this.cartManager = new Carts();
+    }
 
-router.post('/', async (req, res) => {
-    const cart = [];
-    const data = await cartsDao.addCart(cart);
-    res.json(data);
-})
+    init() {
+        //Crea un nuevo carrito
+        this.post('/', [accessRolesEnum.USER], passportStrategiesEnum.JWT, addCart);
 
-router.get('/', async (req, res) => {
-    const data = await cartsDao.getCartById();
-    res.json(data);
-})
+        //Lista los productos del carrito con el id proporcionado
+        this.get('/:cid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, getCartById);
 
-router.get('/:cid', getCartById);
-router.post('/:cid/product/:pid', addProduct);
-router.delete('/:cid/products/:pid', deleteProduct);
-router.put('/:cid', updateAllProducts);
-router.put('/:cid/products/:pid', updateQuantity);
-router.delete('/:cid', deleteAllProducts);
+        //Agrega el producto seleccionado al carrito seleccionado 
+        this.post('/:cid/product/:pid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, addProduct);
 
-export default router;
+        //Elimina del carrito elegido el producto seleccionado
+        this.delete('/:cid/products/:pid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, deleteProduct);
+        
+        //Actualiza el carrito con un arreglo de productos
+        this.put('/:cid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, updateAllProducts);
+        
+        //Actualiza SOLO la cantidad de ejemplares del producto seleccionado del carrito elegido
+        this.put('/:cid/products/:pid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, updateQuantity);
+
+        //Elimina todos los productos del carrito seleccionado
+        this.delete('/:cid', [accessRolesEnum.USER], passportStrategiesEnum.JWT, deleteAllProducts);
+
+        //Finalizar proceso de compra de dicho carrito
+        this.post('/:cid/purchase', [accessRolesEnum.USER], passportStrategiesEnum.JWT, processPurchase)
+    }  
+}

@@ -2,17 +2,35 @@
     <h1>Login</h1>
     <form id="loginForm">
         <label>Email</label>
-        <input name="email" />
+        <input name="email">
         <br />
         <label>Contraseña</label>
-        <input name="password" type="password" />
+        <input name="password" type="password">
         <br />
-        <input type="submit" />
+        <input type="submit" value="Iniciar Sesion">
     </form>
-    <div>
-        <a href="/api/sessions/github"><button>Ingresar con github</button></a>
-    </div>
     <p>No estas registrado? <a href="/register">Registrate aquí</a></p>
+    <a href="/api/sessions/github"><button>Ingresar con github</button></a>
 </div>
+<script>
+    const form = document.getElementById('loginForm');
 
-<script src="/js/login.js"></script>
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const obj = {};
+
+        data.forEach((value, key) => obj[key] = value);
+        fetch('/api/sessions/login', {
+            method: 'POST',
+            body: JSON.stringify(obj),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(result => {
+            if (result.status === 200) {
+                window.location.replace('/products');
+            }
+        })
+    })
+</script>

@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const usersCollection = 'users';
 
-const ageValidator = (value) => {
-    return value > 18;
-};
-
 const usersSchema = new mongoose.Schema({
     first_name: {
         type: String,
@@ -17,11 +13,7 @@ const usersSchema = new mongoose.Schema({
     },
     age: {
         type: Number,
-        required: true,
-        validate: {
-            validator: ageValidator,
-            message: 'La edad debe ser mayor de 18 años'
-        }
+        required: true
     },
     email: {
         type: String,
@@ -30,7 +22,6 @@ const usersSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        minlength: 8,
         required: true
     },
     cart: {

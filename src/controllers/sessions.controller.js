@@ -1,114 +1,52 @@
-import passport from "passport";
-import SessionsService from "../services/sessions.services.js";
+import {
+    Register as RegisterService,
+    Login as LoginService
+} from "../services/sessions.services.js";
 
-const sessionController = {
 
-    async login(req, res, next) {
-        passport.authenticate("login", { failureRedirect: "/fail-login" })(
-            req,
-            res,
-            next
-        );
-    },
+const Login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const accessToken = await LoginService(email, password)
+        res.cookie('coderCookieToken', accessToken, { maxAge: 60 * 60 * 1000, httpOnly: true }).send({ status: 'success', message: 'login success' })
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+}
 
-    async loginCallback(req, res) {
-        if (!req.user) {
-            return res
-                .status(401)
-                .send({ status: "error", message: "usuario y/o contraseña incorrecta" });
-        }
-        req.session.user = {
-            name: `${req.user.first_name} ${req.user.last_name}`,
-            email: req.user.email,
-            age: req.user.age,
-        };
-        res.send({ status: "success", message: "inicio de sesión correcto" });
-    },
+const Logout = (req, res) => {
+    req.session.destroy(error => {
+        if (error) return res.status(500).send({ status: 'error', message: error.message });
+        res.redirect('/login');
+    })
+}
 
-    failLogin(req, res) {
-        res.status(500).send({ status: "error", message: "no se pudo iniciar sesion" });
-    },
+const Register = async (req, res) => {
+    try {
+        const { first_name, last_name, age, role, email, password } = req.body;
+        const userToSave = await RegisterService(first_name, last_name, age, role, email, password)
 
-    logout(req, res) {
-        req.session.destroy((error) => {
-            if (error) {
-                return res
-                    .status(500)
-                    .send({ status: "error", message: error.message });
-            }
-            res.redirect("/login");
-        });
-    },
+        res.status(201).send({ status: 'success', payload: userToSave });
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+}
 
-    async register(req, res, next) {
-        passport.authenticate("register", {
-            failureRedirect: "/fail-register",
-        })(req, res, next);
-    },
 
-    async registerCallback(req, res) {
-        res.status(201).send({ status: "success", message: "usuario registrado" });
-    },
 
-    failRegister(req, res) {
-        res.status(500).send({ status: "error", message: "register fail" });
-    },
+const Github = async (req, res) => {
+    res.send({ status: 'success', message: 'user registered' });
+}
 
-    
+const Github_callback = async (req, res) => {
+    req.session.user = req.user;
+    res.redirect('/');
+}
 
-    github: passport.authenticate("github", { scope: ["user:email"] }),
-
-    async githubCallback(req, res, next) {
-        passport.authenticate("github", async (err, user, info) => {
-            if (err) {
-                return res
-                    .status(500)
-                    .json({
-                        message: "Error authenticating with GitHub",
-                        error: err.message,
-                    });
-            }
-            if (!user) {
-                return res
-                    .status(401)
-                    .json({ message: "No se pudo autenticar con github" });
-            }
-
-            req.login(user, async (loginErr) => {
-                if (loginErr) {
-                    return res
-                        .status(500)
-                        .json({ message: "error", error: loginErr.message });
-                }
-
-                req.session.user = {
-                    name: `${user.first_name} ${user.last_name}`,
-                    email: user.email,
-                    age: user.age,
-                };
-
-                return res.redirect("/home");
-            });
-        })(req, res, next);
-    },
-
-    githubCallbackFail(req, res) {
-        res.status(401).json({ message: "No se pudo autenticar con github" });
-    },
-
-    async getCurrentUser(req, res) {
-        try {
-            const user = await SessionsService.getCurrentUser(req);
-            return res.status(200).json({ user });
-        } catch (error) {
-            return res
-                .status(500)
-                .json({
-                    message: "error",
-                    error: error.message,
-                });
-        }
-    },
-};
-
-export default sessionController;
+export {
+    Login,
+    Logout,
+    Register,
+    Github,
+    Github_callback
+}

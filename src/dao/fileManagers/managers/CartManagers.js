@@ -1,12 +1,11 @@
 import fs from 'fs';
 
-class CartManagerFS {
+class CartManager {
     constructor(path) {
         this.path = path;
     }
 
-    //Devuelve todos los carritos
-    getAll = async () => {
+    getCart = async () => {
         try {
             if (fs.existsSync(this.path)) {
                 const data = await fs.promises.readFile(this.path, 'utf-8');
@@ -21,10 +20,9 @@ class CartManagerFS {
         }
     }
 
-    //Crea un carrito
     addCart = async () => {
         try {
-            const allCarts = await this.getAll();
+            const allCarts = await this.getCart();
             let cart = {}
             //Estructura de un carrito
             cart.id = allCarts.length === 0 ? 1 : allCarts[allCarts.length - 1].id + 1;
@@ -40,8 +38,7 @@ class CartManagerFS {
         }
     }
 
-    //Obtiene un carrito por su id
-    getById = async (id) => {
+    getCartById = async (id) => {
         try {
             const allCarts = await this.getCart();
             const cartById = allCarts.find(p => p.id === id);
@@ -56,7 +53,6 @@ class CartManagerFS {
         }
     }
 
-    //Actualiza los productos del carrito pasado por id
     updateCart = async (idCart, idProduct) => {
         try {
             const allCarts = await this.getCart();
@@ -81,6 +77,5 @@ class CartManagerFS {
             throw error;
         }
     }
-    
 }
-export default CartManagerFS;
+export default CartManager;
