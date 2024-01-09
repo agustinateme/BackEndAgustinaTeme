@@ -9,23 +9,23 @@ import CartsRouter from './routes/carts.router.js';
 import ViewsRouter from './routes/views.router.js';
 import session from 'express-session';
 import currentRouter from "./routes/current.router.js"
+import errorHandler from "./middlewares/errors/index.js";
 
 const app = express();
 
-// Crear una instancia del ViewsRouter
+
 const viewsRouter = new ViewsRouter();
 
 const productsRouter = new ProductsRouter();
 const cartsRouter = new CartsRouter();
-// Inicializar las rutas usando el método init() del ViewsRouter
+
 viewsRouter.init();
 
 cartsRouter.init();
 productsRouter.init();
-//Passport config
 
 app.use(session({
-  secret: 'your-secret-key', // Esta clave debería ser única y segura en un entorno de producción
+  secret: 'secret-key', 
   resave: false,
   saveUninitialized: false
 }));
@@ -48,7 +48,18 @@ app.use('/api/products', productsRouter.getRouter());
 app.use('/api/carts', cartsRouter.getRouter());
 app.use('/current', currentRouter);
 
+app.use(errorHandler);
 
+app.use((err, req, res, next) => {
+  if (err && err.error && err.error.isJoi) {
+    res.status(422).json({
+      type: err.type,
+      message: err.error.toString(),
+    });
+  } else {
+    next(err);
+  }
+});
 
 app.listen(8080, () => console.log('Server running'));
 import './dao/dbConfig.js';

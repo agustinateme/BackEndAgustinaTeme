@@ -25,10 +25,24 @@ const generateToken = (user) => {
     return token;
 }
 
+const generateProduct = () => {
+    return {
+        title: faker.commerce.productName(),
+        price: faker.commerce.price(),
+        department: faker.commerce.department(),
+        stock: faker.number.int(1),
+        id: faker.database.mongodbObjectId(),
+        image: faker.image.url(),
+        code: faker.string.alphanumeric(10),
+        description: faker.commerce.productDescription(),
+    };
+};
+
 export {
     authorization,
     __dirname,
     createHash,
     isValidPassword,
-    generateToken
+    generateToken,
+    generateProduct
 }

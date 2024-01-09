@@ -1,4 +1,5 @@
 import { getProducts as getProductsService, getProductById as getProductByIdService, addProduct as addProductService, updateProduct as updateProductService, deleteProduct as deleteProductService } from '../services/products.services.js';
+import { generateProduct } from "../utils.js";
 
 const getProducts = async (req, res) => {
     try {
@@ -81,10 +82,26 @@ const deleteProduct = async (req, res) => {
     }
 }
 
+const mockingProducts = async (req, res) => {
+    try {
+        let products = [];
+
+        for (let i = 0; i < 100; i++) {
+            products.push(generateProduct());
+        }
+
+        res.send({ status: "success", counter: products.length, data: products});
+    } catch (error) {
+        res.status(400).send({ error: error.message });
+    }
+}
+
+
 export {
     getProducts,
     getProductById,
     addProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    mockingProducts
 }

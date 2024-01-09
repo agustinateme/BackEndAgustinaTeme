@@ -1,7 +1,7 @@
 import Router from './router.js';
 import Products from '../dao/memoryManager/products.managers.js';
 import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
-import { getProducts, getProductById, addProduct, updateProduct, deleteProduct} from '../controllers/products.controller.js';
+import { getProducts, getProductById, addProduct, updateProduct, deleteProduct, mockingProducts } from '../controllers/products.controller.js';
 
 export default class ProductsRouter extends Router {
     constructor() {
@@ -24,5 +24,8 @@ export default class ProductsRouter extends Router {
 
         //Elimina el producto con el id indicado
         this.delete(':/pid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, deleteProduct);
+    
+        //Mocking y manejo de errores
+        this.get('/mockingproducts', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, mockingProducts)       
     }
 }
