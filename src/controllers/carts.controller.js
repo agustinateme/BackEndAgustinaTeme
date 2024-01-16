@@ -15,6 +15,7 @@ const addCart = async (req, res) => {
         res.status(201).send({ status: 'success', payload: newCart });
     } catch (error) {
         res.status(500).send({ status: 'error', payload: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -26,6 +27,7 @@ const getCartById = async (req, res) => {
 
     } catch (error) {
         res.status(500).send({ status: 'error', payload: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -39,6 +41,7 @@ const addProduct = async (req, res) => {
     }
     catch (error) {
         res.status(400).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -53,6 +56,7 @@ const deleteProduct = async (req, res) => {
     }
     catch (error) {
         res.status(400).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -64,6 +68,7 @@ const deleteAllProducts = async (req, res) => {
         res.status(200).send({ status: 'success', payload: deletedProducts });
     } catch (error) {
         res.status(400).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -76,6 +81,7 @@ const updateAllProducts = async (req, res) => {
         res.status(200).send({ status: 'success', payload: updatedCart });
     } catch (error) {
         res.status(400).send({ status: 'error', payload: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -90,6 +96,7 @@ const updateQuantity = async (req, res) => {
         res.status(200).send({ status: 'success', payload: updatedCart });
     } catch (error) {
         res.status(400).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 

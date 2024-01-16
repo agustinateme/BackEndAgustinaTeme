@@ -11,6 +11,7 @@ const Login = async (req, res) => {
         res.cookie('coderCookieToken', accessToken, { maxAge: 60 * 60 * 1000, httpOnly: true }).send({ status: 'success', message: 'login success' })
     } catch (error) {
         res.status(500).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -29,6 +30,7 @@ const Register = async (req, res) => {
         res.status(201).send({ status: 'success', payload: userToSave });
     } catch (error) {
         res.status(500).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 

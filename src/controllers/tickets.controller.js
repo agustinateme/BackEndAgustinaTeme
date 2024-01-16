@@ -8,6 +8,7 @@ const processPurchase = async (req, res) => {
         res.send({ payload: ticket })
     } catch (error) {
         res.status(500).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 

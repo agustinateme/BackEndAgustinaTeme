@@ -25,6 +25,7 @@ const getProducts = async (req, res) => {
         });
     } catch (error) {
         res.send({ status: 'error', payload: { message: error.message } });
+        req.logger.error(error.message);
     }
 }
 
@@ -36,6 +37,7 @@ const getProductById = async (req, res) => {
     }
     catch (error) {
         res.status(500).send({ status: 'error', error: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -47,6 +49,7 @@ const addProduct = async (req, res) => {
     }
     catch (error) {
         res.status(400).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -68,6 +71,7 @@ const updateProduct = async (req, res) => {
     }
     catch (error) {
         res.status(400).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -79,6 +83,7 @@ const deleteProduct = async (req, res) => {
     }
     catch (error) {
         res.status(400).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 
@@ -93,6 +98,7 @@ const mockingProducts = async (req, res) => {
         res.send({ status: "success", counter: products.length, data: products});
     } catch (error) {
         res.status(400).send({ error: error.message });
+        req.logger.error(error.message);
     }
 }
 

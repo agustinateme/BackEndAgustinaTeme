@@ -44,6 +44,7 @@ const renderProducts = async (req, res) => {
         });
     } catch (error) {
         res.status(500).render('error', { message: 'Error al cargar la lista de productos.' });
+        req.logger.error(error.message);
     }
 }
 
@@ -63,6 +64,7 @@ const renderDetails = async (req, res) => {
         res.render('productDetails', { product: productObject });
     } catch (error) {
         res.status(500).render('error', { message: 'Error al recuperar los detalles del producto.' });
+        req.logger.error(error.message);
     }
 }
 
@@ -89,6 +91,7 @@ const renderCart = async (req, res) => {
         res.render('carts', { products: productsWithSubtotals });
     } catch (error) {
         res.status(500).render('error', { message: 'Error al cargar el carrito.' });
+        req.logger.error(error.message);
     }
 }
 
@@ -119,6 +122,7 @@ const addToCart = async (req, res) => {
 
     } catch (error) {
         res.status(500).send('Error al añadir el producto al carrito.');
+        req.logger.error(error.message);
     }
 }
 

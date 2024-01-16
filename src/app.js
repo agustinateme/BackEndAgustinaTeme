@@ -7,9 +7,11 @@ import sessionsRouter from './routes/sessions.router.js';
 import ProductsRouter from './routes/products.router.js';
 import CartsRouter from './routes/carts.router.js';
 import ViewsRouter from './routes/views.router.js';
+import loggerRouter from './routes/logger.router.js';
 import session from 'express-session';
 import currentRouter from "./routes/current.router.js"
 import errorHandler from "./middlewares/errors/index.js";
+import { addLogger } from './utils.js';
 
 const app = express();
 
@@ -47,6 +49,9 @@ app.use('/', viewsRouter.getRouter());
 app.use('/api/products', productsRouter.getRouter());
 app.use('/api/carts', cartsRouter.getRouter());
 app.use('/current', currentRouter);
+
+app.use(addLogger);
+app.use('/loggerTest', loggerRouter);
 
 app.use(errorHandler);
 
