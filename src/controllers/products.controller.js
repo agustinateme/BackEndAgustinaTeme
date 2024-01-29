@@ -1,5 +1,7 @@
 import { getProducts as getProductsService, getProductById as getProductByIdService, addProduct as addProductService, updateProduct as updateProductService, deleteProduct as deleteProductService } from '../services/products.services.js';
+import { productsServices, usersServices } from '../repositories/';
 import { generateProduct } from "../utils.js";
+import jwt from 'jsonwebtoken';
 
 const getProducts = async (req, res) => {
     try {
@@ -44,6 +46,30 @@ const getProductById = async (req, res) => {
 const addProduct = async (req, res) => {
     try {
         const product = req.body;
+        const { title, description, price, thumbnail, code, stock, status, category, owner } = req.body;
+
+        if (!title || !description || !price || !code || !stock || !status || !category) {
+            return res.status(400).send({ status: 'error', message: 'incomplete values' });
+        }
+
+        if (owner) {
+            const token = req.cookies["jwtCookie"];
+            if (!token) return res.status(403).json({ status: "error", error: "token no provided." });
+       
+            const { uid } = jwt.verify(token, "coder55575");
+
+            let resultUser = await usersServices.getUserById(uid);
+            if (!resultUser) return res.status(400).json({ message: "User not found." });
+            if (resultUser.email !== owner) return res.status(400).json({ message: "Owner doesnt exists." });
+
+            // Validar que el usuario cuente con role premium
+            if (resultUser.role === "premium") {
+                owner = resultUser.email
+            } else {
+                owner = null
+            }
+        }
+
         const result = await addProductService(product);
         res.send({ status: 'success', payload: result });
     }

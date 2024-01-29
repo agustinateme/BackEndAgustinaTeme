@@ -34,7 +34,33 @@ const Register = async (req, res) => {
     }
 }
 
+const mailOptions = {
+    from: 'Coder Tests <agustinateme2@gmail.com>',
+    to: email,
+    subject: "Restablecer contraseña",
+    html: `
+            <div>
+            <h1>Restablecer contraseña</h1>
+            <p>Ingrese en el siguiente enlace: 
+            <a href="http://localhost:8080/api/sessions/restore/${token}">Haga click aquí</a>
+            </p>
+            </div>
+            `
+}
 
+transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("Correo enviado", info.response);
+        res.status(200).json({ message: "Se envió enlace para restablecer la contraseña a su correo electrónico." })
+    }
+})
+
+    } catch (error) {
+    res.status(500).send("Error al enviar correo y restablecer contraseña.")
+}
+}
 
 const Github = async (req, res) => {
     res.send({ status: 'success', message: 'user registered' });
