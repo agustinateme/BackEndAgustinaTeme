@@ -1,0 +1,185 @@
+paths:
+  /api/products/:
+    get:
+      summary: Lista todos los productos de la base
+      tags:
+        - Products
+      responses:
+        "200":
+          description: Productos obtenidos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#components/schemas/getProducts'
+        "500":
+          description: Error del servidor
+    post:
+      summary: Agrega un producto
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/addProduct'
+      responses:
+        "200":
+          description: Producto agregado
+        "500":
+          description: Error del servidor
+  /api/products/{pid}:
+    get:
+      summary: Trae solo el producto con el id proporcionado
+      tags:
+        - Products
+      parameters:
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto seleccionado
+        schema:
+          $type: String
+      responses:
+        "200":
+          description: Se trajo el producto seleccionado por su ID
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/getProductById'
+        "500":
+          description: Error del servidor.
+    put:
+      summary: Toma un producto y lo atualiza por los campos enviados desde el body
+      tags:
+        - Products
+      parameters:
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto a actualizar.
+        schema:
+          $type: String
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/updateProduct'
+      responses:
+        "200":
+          description: Se actualizo el producto
+        "500":
+          description: Error del servidor.
+    delete:
+      summary: Elimina el producto con el id indicado.
+      tags:
+        - Products
+      parameters:
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto a eliminar.
+        schema:
+          $type: String
+      responses:
+        "200":
+          description: Producto eliminado
+        "500":
+          description: Error del servidor.
+
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: ID generado por MongoDB
+        owner:
+          type: ObjectId
+          description: Referencia a un usuario por su ID
+        title:
+          type: String
+          description: Nombre del producto
+        description:
+          type: String
+          description: Descripcion del carrito
+        price:
+          type: Number
+          description: Precio del producto
+        thumbnail:
+          type: Array
+          description: arreglo con las url de las imagenes del producto
+        code:
+          type: String
+          description: Codigo del producto, este es unico
+        stock:
+          type: Number
+          description: Stock del producto
+        status:
+          type: Boolean
+          description: Bandera booleana que indica si el producto esta avaible o no
+        category:
+          type: String
+          description: Categoria del producto
+      example:
+          _id: ObjectId("93293u90jfiqfsaf32934d")
+          owner:  ObjectId("8358454iorjwiodj903")
+          tittle: Samsung S6 lite
+          description: 64GB ROM 4GB RAM
+          price: 599
+          thumbnail: [s6lite1.svg, s6lite2.svg, s6lite3.svg]
+          code: 2-3453-1234
+          stock: 15
+          status: true
+          category: Tablets
+  requestBodies:
+    addProduct:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: ID generado por MongoDB
+        owner:
+          type: ObjectId
+          description: Referencia a un usuario por su ID
+        title:
+          type: String
+          description: Nombre del producto
+        description:
+          type: String
+          description: Descripcion del carrito
+        price:
+          type: Number
+          description: Precio del producto
+        thumbnail:
+          type: Array
+          description: arreglo con las url de las imagenes del producto
+        code:
+          type: String
+          description: Codigo del producto, este es unico
+        stock:
+          type: Number
+          description: Stock del producto
+        status:
+          type: Boolean
+          description: Bandera booleana que indica si el producto esta avaible o no
+        category:
+          type: String
+          description: Categoria del producto
+        example:
+          _id: ObjectId("93293u90jfiqfsaf32934d")
+          owner:  ObjectId("8358454iorjwiodj903")
+          tittle: Samsung S6 lite
+          description: 64GB ROM 4GB RAM
+          price: 599
+          thumbnail: [s6lite1.svg, s6lite2.svg, s6lite3.svg]
+          code: 2-3453-1234
+          stock: 15
+          status: true
+          category: Tablets
+      

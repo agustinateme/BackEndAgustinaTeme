@@ -1,0 +1,197 @@
+paths:
+  /api/cart:
+    post:
+      summary: Crea un nuevo carrito
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Carrito creado
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/Cart'
+
+  /api/cart/{cid}:
+    get: 
+      summary: Lista los productos del carrito con el id proporcionado
+      tags:
+        - Cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/getCartById'
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito seleccionado del cual quiero listar los productos
+        schema:
+          $type: String
+      responses:
+      "200":
+        description: se muestra la lista de productos del carrito seleccionado
+      "500":
+        description: Error del servidor
+
+    put: 
+      summary: Actualiza el carrito con un arreglo de productos
+      tags:
+        - Cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/updateAllProducts'
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito que deseo actualizar
+        schema:
+          $type: String
+      responses:
+      "200":
+        description: carrito actualizado
+      "404":
+        description: Carrito no encontrado en la base de datos
+      "500":
+        description: Error del servidor
+
+  /api/cart/{cid}/{pid}:
+    post:
+      summary: Agrega el producto seleccionado al carrito seleccionado 
+      tags:
+        - Cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/addProduct'
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito seleccionado al cual le agregare el producto
+        schema:
+          $type: String
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto que agregare al carrito
+        schema:
+          $type: String
+      responses:
+        "200":
+          description: Producto agregado al carrito
+        "500":
+          description: Error del servidor
+
+    put: 
+      summary: Actualiza SOLO la cantidad de ejemplares del producto seleccionado del carrito elegido
+    tags:
+        - Cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/updateQuantity'
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito en el que está el producto que deseo modificar la cantidad
+        schema:
+          $type: String
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto que deseo cambiar la cantidad
+        schema:
+          $type: String
+      responses:
+        "200":
+          description: Cantidad del producto actualizada
+        "500":
+          description: Error del servidor
+
+
+    delete:
+      summary: Elimina del carrito elegido el producto seleccionado
+      tags:
+        - Cart
+      requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#components/requestBodies/deleteProduct'
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito seleccionado
+        schema:
+          $type: String
+      - name: pid
+        in: path
+        required: true
+        description: ID del producto que deseo eliminar
+        schema:
+          $type: String
+      responses:
+        "200":
+          description: Producto eliminado
+        "500":
+          description: Error del servidor
+  
+  /api/cart/{cid}:
+    delete:
+      summary: Elimina todos los productos del carrito seleccionado
+      tags:
+        - Cart
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del carrito que deseo eliminar
+        schema:
+          $type: String
+      responses:
+        "200":
+          description: Carrito vaciado
+        "500":
+          description: Error del servidor
+
+
+components:
+  schemas:
+    Cart:
+      type: object
+      properties:
+        _id: 
+          type: ObjectId
+          description: ID generado por MongoDB
+        products:
+          type: Array
+          description: Productos agregados en el carrito
+      example:
+        _id: ObjectId("830315138583r9h3h841910")
+        products_list: []
+  requestBodies:
+    addProduct:
+      type: object
+      properties:
+        product: 
+          type: ObjectId
+          description: Referencia en el carrito a un producto agregado
+        quantity:
+          type: Number
+          description: Cardinal del producto agregado (# = cardinal = cantidad)
+      example:
+        quantity: 9

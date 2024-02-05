@@ -10,7 +10,7 @@ export default class ProductsRouter extends Router {
     }
 
     init() {
-        //Lista todos los productos de la base
+        //Lista todos los productos de la base de datos
         this.get('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, getProducts);
 
         //Trae solo el producto con el id proporcionado
