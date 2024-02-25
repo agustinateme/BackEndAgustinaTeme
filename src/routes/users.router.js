@@ -1,6 +1,15 @@
-import Router from 'express';
-import authJwt from '../middlewares/authJwt';
-import usersControllers from '../controllers/users.controllers';
+import Router from './router.js';
+import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
+import { login, register, test, changeRole, uploadFields } from '../controllers/users.controller.js';
+import * as authJwt from '../middlewares/authJwt.js';
+import multerFields from '../middlewares/multer.js'
 
-
-const router = Router();
+export default class UsersRouter extends Router {
+    init() {
+        this.post('/login', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, login)
+        this.post('/test', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, test)
+        this.post('/register', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, register)
+        this.put('/premium/:uid', authJwt.verifyToken, authJwt.isUserOrPremium, changeRole)
+        this.post("/:uid/documents", multerFields, uploadFields)
+    }
+}

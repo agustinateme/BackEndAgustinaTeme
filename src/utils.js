@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, path } from 'path';
+import multer from 'multer';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import winston from 'winston';
@@ -82,12 +83,37 @@ const addLogger = (req, res, next) => {
    next();
 }
 
+const storage = multer.diskStorage({
+   destination: function (req, file, cb) {
+
+      if (file.fieldname === "imagenPerfil") {
+         cb(null, path.join(__dirname, "public", "profiles"))
+      }
+
+      if (file.fieldname === "imagenProducto") {
+         cb(null, path.join(__dirname, "public", "products"))
+      }
+
+      if (file.fieldname === "documents") {
+         cb(null, path.join(__dirname, "public", "documents"))
+      }
+
+   },
+
+   filename: function (req, file, cb) {
+      cb(null, file.originalname)
+   }
+})
+
+const uploader = multer({ storage: storage })
+
 export {
-    authorization,
-    __dirname,
-    createHash,
-    isValidPassword,
-    generateToken,
-    generateProduct,
-    addLogger
+   authorization,
+   __dirname,
+   createHash,
+   isValidPassword,
+   generateToken,
+   generateProduct,
+   addLogger,
+   uploader
 }

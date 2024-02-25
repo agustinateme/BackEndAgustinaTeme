@@ -33,7 +33,15 @@ const usersSchema = new mongoose.Schema({
         required: true,
         enum: ['user', 'premium', 'admin'],
         default: 'user'
-    }
+    },
+    documents: [
+        {
+            name: String,
+            reference: String,
+            status: { type: String, default: "the document is not there" }
+        }
+    ],
+    last_connection: String
 });
 
 export const usersModel = mongoose.model(usersCollection, usersSchema);

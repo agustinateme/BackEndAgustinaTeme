@@ -66,5 +66,11 @@ const isAdmin = async (req, res, next) => {
     return res.status(403).json({ message: "Require Admin role" })
 }
 
-
-module.exports = { verifyToken, isAdminOrPremium, isUserOrPremium, isUser, isAdmin, ROLES }
+export {
+    verifyToken,
+    isAdminOrPremium,
+    isUserOrPremium,
+    isUser,
+    isAdmin,
+    ROLES
+}

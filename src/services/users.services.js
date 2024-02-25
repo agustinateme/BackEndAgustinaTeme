@@ -1,4 +1,4 @@
-import UsersRepository from "../repositories/users.repository.js";
+import UsersRepository from "../repositories/user.repository.js";
 import { Users } from '../dao/factory.js';
 import { InvalidCredentials, UserAlreadyExists } from "../utils/custom.exceptions.js";
 import { loginInvalidCredentials } from "../utils/custom.html.js";
@@ -8,8 +8,28 @@ import { createHash, generateToken, isValidPassword } from "../utils/utils.js";
 const usersDao = new Users();
 const usersRepository = new UsersRepository(usersDao);
 
+const updateUser = async (uid, user) => {
+    const user = await usersRepository.updateUser(uid, user);
+    return user;
+}
+
+const getByEmail = async (email) => {
+    const user = await usersRepository.getByEmail(email);
+    if (!user) {
+        throw new InvalidCredentials('user not found');
+    }
+    return user;
+}
+
+const getUserById = async (id) => {
+    const user = await usersRepository.getUserById(id);
+    if (!user) {
+        throw new InvalidCredentials('user not found');
+    }
+    return user;
+}
+
 const login = async (password, email) => {
-    // const user = await this.usersManager.getByEmail(email);
     const user = await usersRepository.getByEmail(email);
 
     if (!user) {
@@ -19,7 +39,6 @@ const login = async (password, email) => {
     const comparePassword = isValidPassword(password, user.password);
 
     if (!comparePassword) {
-        //Enviar un correo electrónico
         const emailInvalidCredentials = {
             to: user.email,
             subject: 'Login fallido',
@@ -37,11 +56,9 @@ const login = async (password, email) => {
 }
 
 const register = async (user) => {
-    // const existsUser = await this.usersManager.getByEmail(email);
     const userByEmail = await usersRepository.getByEmail(user.email);
 
     if (userByEmail) {
-        // vamos a lanzar una excepcion
         throw new UserAlreadyExists('user already exists')
     }
 
@@ -59,6 +76,10 @@ const register = async (user) => {
 }
 
 export {
+    getByEmail,
     login,
-    register
+    register,
+    usersRepository,
+    getUserById,
+    updateUser
 }
