@@ -31,7 +31,6 @@ const usersSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true,
-        enum: ['user', 'premium', 'admin'],
         default: 'user'
     },
     documents: [
@@ -41,7 +40,10 @@ const usersSchema = new mongoose.Schema({
             status: { type: String, default: "the document is not there" }
         }
     ],
-    last_connection: String
+    last_connection: {
+        type: Date,
+        default: Date.now()
+    }
 });
 
 export const usersModel = mongoose.model(usersCollection, usersSchema);

@@ -1,16 +1,42 @@
 import UsersRepository from "../repositories/user.repository.js";
-import { Users } from '../dao/factory.js';
+import Users from '../dao/dbManagers/user.managers.js';
 import { InvalidCredentials, UserAlreadyExists } from "../utils/custom.exceptions.js";
-import { loginInvalidCredentials } from "../utils/custom.html.js";
-import { sendEmail } from "./mail.service.js";
-import { createHash, generateToken, isValidPassword } from "../utils/utils.js";
+import EErrors from "../errors/enums.js";
+import UserRepository from "../repositories/user.repository.js";
+import CustomError from "../errors/Custom.Error.js";
 
 const usersDao = new Users();
 const usersRepository = new UsersRepository(usersDao);
 
+const getUsers = async () => {
+    try {
+        const users = usersRepository.getUsers();
+        return users
+    } catch (error) {
+        throw CustomError.createError({
+            name: 'Users not found',
+            cause: 'Error dont found users',
+            message: `Users not found: ${error.message}`,
+            code: EErrors.USER_NOT_FOUND
+        });
+    }
+}
+
 const updateUser = async (uid, user) => {
-    const user = await usersRepository.updateUser(uid, user);
-    return user;
+    const updateuser = await usersRepository.updateUser(uid, user);
+    return updateuser;
+}
+
+const updateLastConnection = async (userId, lastConnection) => {
+    try {
+        await usersDao.updateLastConnection(userId, lastConnection);
+    } catch (error) {
+        throw new CustomError({
+            name: 'UpdateLastConnectionError',
+            message: `Error updating user's last connection: ${error.message}`,
+            code: EErrors.INTERNAL_SERVER_ERROR
+        });
+    }
 }
 
 const getByEmail = async (email) => {
@@ -29,57 +55,72 @@ const getUserById = async (id) => {
     return user;
 }
 
-const login = async (password, email) => {
-    const user = await usersRepository.getByEmail(email);
+const changeUserRole = async (id) => {
+    try {
+        const user = await UserRepository.getUserById(id);;
+        if (!user) {
+            throw CustomError.createError({
+                name: 'UserError',
+                cause: 'User not found',
+                message: 'User not found with the provided ID',
+                code: EErrors.USER_NOT_FOUND
+            });
+        }
 
-    if (!user) {
-        throw new InvalidCredentials('incorrect credentials');
+        user.role = (user.role === 'user') ? 'premium' : 'user';
+
+        await user.save();
+        return user;
+    } catch (error) {
+        throw CustomError.createError({
+            name: 'DatabaseError',
+            cause: 'Error changing user role',
+            message: `Error changing user role: ${error.message}`,
+            code: EErrors.DATABASE_ERROR
+        });
     }
-
-    const comparePassword = isValidPassword(password, user.password);
-
-    if (!comparePassword) {
-        const emailInvalidCredentials = {
-            to: user.email,
-            subject: 'Login fallido',
-            html: loginInvalidCredentials
-        };
-
-        await sendEmail(emailInvalidCredentials);
-
-        throw new InvalidCredentials('incorrect credentials');
-    }
-
-    const accessToken = generateToken(user);
-
-    return accessToken;
 }
 
-const register = async (user) => {
-    const userByEmail = await usersRepository.getByEmail(user.email);
-
-    if (userByEmail) {
-        throw new UserAlreadyExists('user already exists')
-    }
-
-    const hashedPassword = createHash(user.password);
-
-    const newUser = {
-        ...user
-    }
-
-    newUser.password = hashedPassword;
-
-    const result = await usersRepository.save(newUser);
-
+const deleteUser = async (id) => {
+    const result = await usersRepository.deleteById(id);
     return result;
 }
 
+const cleanInactiveUsers = async () => {
+    try {
+        const users = await usersRepository.findInactiveUsers();
+        users.forEach(async (user) => {
+            await usersRepository.deleteById(user._id);
+        });
+    } catch (error) {
+        throw new CustomError({
+            name: 'CleanInactiveUsersError',
+            message: `Error cleaning inactive users: ${error.message}`,
+            code: EErrors.INTERNAL_SERVER_ERROR
+        });
+    }
+}
+
+const uploadDocuments = async (user, files) => {
+    let documents = []
+    const fileArray = Object.entries(files)
+    fileArray.map(([name, data]) => {
+        documents.push({ name, reference: data[0].path })
+    })
+    const result = await usersRepository.uploadDocuments(user, documents)
+    return result
+}
+
+
 export {
+    getUsers,
+    updateUser,
+    updateLastConnection,
     getByEmail,
-    login,
-    register,
+    changeUserRole,
     usersRepository,
     getUserById,
-    updateUser
+    deleteUser,
+    cleanInactiveUsers,
+    uploadDocuments
 }

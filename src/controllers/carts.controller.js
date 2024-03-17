@@ -1,3 +1,4 @@
+// Controladores para manipular las operaciones relacionadas con los carritos de compras.
 import {
     addCart as addCartService,
     getCartById as getCartByIdService,
@@ -8,7 +9,7 @@ import {
     updateQuantity as updateQuantityService
 } from '../services/carts.services.js';
 
-
+// Controlador para agregar un nuevo carrito de compras.
 const addCart = async (req, res) => {
     try {
         const newCart = await addCartService({});
@@ -19,6 +20,7 @@ const addCart = async (req, res) => {
     }
 }
 
+// Controlador para obtener un carrito de compras por su ID.
 const getCartById = async (req, res) => {
     try {
         const cid = req.params.cid;
@@ -31,6 +33,7 @@ const getCartById = async (req, res) => {
     }
 }
 
+// Controlador para agregar un producto a un carrito de compras.
 const addProduct = async (req, res) => {
     try {
         const idCart = req.params.cid;
@@ -45,6 +48,7 @@ const addProduct = async (req, res) => {
     }
 }
 
+// Controlador para eliminar un producto de un carrito de compras.
 const deleteProduct = async (req, res) => {
     try {
         const idCart = req.params.cid;
@@ -60,6 +64,7 @@ const deleteProduct = async (req, res) => {
     }
 }
 
+// Controlador para eliminar todos los productos de un carrito de compras.
 const deleteAllProducts = async (req, res) => {
     try {
         const idCart = req.params.cid;
@@ -72,6 +77,7 @@ const deleteAllProducts = async (req, res) => {
     }
 }
 
+// Controlador para actualizar todos los productos de un carrito de compras.
 const updateAllProducts = async (req, res) => {
     try {
         const idCart = req.params.cid;
@@ -85,6 +91,7 @@ const updateAllProducts = async (req, res) => {
     }
 }
 
+// Controlador para actualizar la cantidad de un producto en un carrito de compras.
 const updateQuantity = async (req, res) => {
     try {
         const idCart = req.params.cid;

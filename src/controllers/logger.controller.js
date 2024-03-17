@@ -1,3 +1,4 @@
+// Controlador para probar el logger de la aplicación.
 const Test_logger = async (req, res) => {
     req.logger.fatal('fatal...');
     req.logger.debug('debug...');
@@ -6,7 +7,6 @@ const Test_logger = async (req, res) => {
     req.logger.error('error...');
     req.logger.info('info...');
 };
-
 
 export {
     Test_logger

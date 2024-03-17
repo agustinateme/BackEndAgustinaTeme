@@ -1,13 +1,14 @@
+// Define enumeraciones para estrategias de Passport y roles de acceso.
 const passportStrategiesEnum = {
-    JWT: 'jwt',
-    NOTHING: 'na'
+    NOTHING: 'na',
+    JWT: 'jwt'
 };
 
 const accessRolesEnum = {
     ADMIN: 'ADMIN',
     USER: 'USER',
     PUBLIC: 'PUBLIC',
-    PREMIUM: 'PREMIUM',
+    PREMIUM: 'PREMIUM'
 };
 
 export {

@@ -1,31 +1,25 @@
-import Router from './router.js';
-import Products from '../dao/memoryManager/products.managers.js';
+import Router from 'express';
 import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
 import { getProducts, getProductById, addProduct, updateProduct, deleteProduct, mockingProducts } from '../controllers/products.controller.js';
+import { passportCall } from '../config/passport.config.js';
+import { handlePolicies } from '../middlewares/authJwt.js';
 
-export default class ProductsRouter extends Router {
-    constructor() {
-        super();
-        this.productsManager = new Products(); 
-    }
+const router = Router();
 
-    init() {
-        //Lista todos los productos de la base de datos
-        this.get('/', [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, getProducts);
+//Lista todos los productos de la base de datos
+router.get('/', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), getProducts);
 
-        //Trae solo el producto con el id proporcionado
-        this.get('/:pid', [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, getProductById);
+//Trae solo el producto con el id proporcionado
+router.get('/:pid', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), getProductById)
 
-        //Agrega un producto
-        this.post('/', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, addProduct);
+//Agrega un producto
+router.post('/', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), addProduct);
 
-        //Toma un producto y lo atualiza por los campos enviados desde el body
-        this.put('/:pid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, updateProduct);
+//Toma un producto y lo atualiza por los campos enviados desde el body
+router.put('/:pid', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), updateProduct);
 
-        //Elimina el producto con el id indicado
-        this.delete(':/pid', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, deleteProduct);
+//Elimina el producto con el id indicado
+router.delete(':/pid', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), deleteProduct);
     
-        //Mocking y manejo de errores
-        this.get('/mockingproducts', [accessRolesEnum.ADMIN], passportStrategiesEnum.JWT, mockingProducts)       
-    }
-}
+//Mocking y manejo de errores
+router.get('/mockingproducts', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), mockingProducts);    

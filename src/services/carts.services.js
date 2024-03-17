@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import Carts from '../dao/memoryManager/carts.managers.js';
 import CartRepository from '../repositories/cart.repository.js';
 

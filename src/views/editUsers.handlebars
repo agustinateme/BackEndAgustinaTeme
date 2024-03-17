@@ -1,0 +1,72 @@
+{{#each users}}
+<div class="users">
+    <ul>
+        <li>LAST-CONNECTION: {{this.last_connection}}</li>
+        <li>NAME: {{this.first_name}} {{this.last_name}}</li>
+        <li>E-MAIL: {{this.email}}</li>
+        <li>ROL: {{this.role}}</li>
+        <li>CART: {{this.cart}}</li>
+        <li>ID: {{this._id}}</li>
+        <li>
+            <form id="deleteForm_{{this._id}}" class="delete-form">
+                <button type="submit" data-user-id="{{this._id}}">DELETE</button>
+            </form>
+        </li>
+        <li>
+            <form id="changeRoleForm_{{this._id}}" class="change-role-form">
+                <button type="submit" data-user-id="{{this._id}}">CHANGE ROL</button>
+            </form>
+        </li>
+    </ul>
+</div>
+{{/each}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            var deleteForms = document.querySelectorAll('.delete-form');
+
+            deleteForms.forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    var userId = this.querySelector('button').getAttribute('data-user-id');
+
+                    fetch('http://localhost:8080/api/users/' + userId, {
+                        method: 'DELETE'
+                    })
+                        .then(function (response) {
+                            if (response.ok) {
+                                location.reload();
+                            } else {
+                                alert('Error al eliminar el usuario');
+                            }
+                        })
+                        .catch(function (error) {
+                            console.error('Error:', error);
+                        });
+                });
+            });
+        });
+    document.addEventListener('DOMContentLoaded', function () {
+            var changeRoleForms = document.querySelectorAll('.change-role-form');
+
+            changeRoleForms.forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    var userId = this.querySelector('button').getAttribute('data-user-id');
+
+                    fetch('http://localhost:8080/api/users/premium/' + userId, {
+                        method: 'PUT'
+                    })
+                        .then(function (response) {
+                            if (response.ok) {
+                                location.reload();
+                            } else {
+                                alert('Error al cambiar el rol del usuario');
+                            }
+                        })
+                        .catch(function (error) {
+                            console.error('Error:', error);
+                        });
+                });
+            });
+        });
+</script>

@@ -1,58 +1,40 @@
-import { ProductsModel } from '../dao/dbManagers/models/products.models.js';
-import Products from '../dao/dbManagers/products.managers.js';
-import Carts from '../dao/dbManagers/carts.managers.js';
+import { renderHomePage as renderHomepageService } from '../services/views.services.js';
+import { getProductById as getProductByIdService } from '../services/products.services.js';
+import { getCartById as getCartByIdService } from '../services/carts.services.js';
 
-const products = new Products();
-const carts = new Carts();
-
+// Controlador para renderizar la página de registro
 const Register = async (req, res) => {
     res.render('register')
 }
 
+// Controlador para renderizar la página de inicio de sesión
 const Login = async (req, res) => {
     res.render('login')
 }
 
-//ver los productos
-const renderProducts = async (req, res) => {
-    let { page = 1, limit = 10 } = req.query;
-    page = parseInt(page, 10);
-    limit = parseInt(limit, 10);
-
+// Controlador para renderizar la página de inicio con productos
+const renderHomePage = async (req, res) => {
     try {
-        const options = {
-            page: page,
-            limit: limit,
-            lean: true,
-            leanWithId: false
-        };
+        const limit = parseInt(req.query.limit) || 10;
+        const query = req.query.query ? JSON.parse(req.query.query) : {};
+        const page = parseInt(req.query.page) || 1;
+        const sort = req.query.sort ? JSON.parse(req.query.sort) : {};
 
-        const result = await ProductsModel.paginate({}, options);
+        const user = req.user;
 
-        console.log("Datos de usuario:", req.session.user);
-
-        res.render('products', {
-            user: req.session.user,
-            products: result.docs,
-            page: result.page,
-            totalPages: result.totalPages,
-            hasNextPage: result.hasNextPage,
-            hasPrevPage: result.hasPrevPage,
-            prevPage: result.prevPage,
-            nextPage: result.nextPage,
-            limit: result.limit
-        });
+        const { products, cartId, result } = await renderHomepageService(limit, page, query, sort, user);
+        res.render('products', { products, cartId, total: result.total, limit, page, user: req.user });
     } catch (error) {
-        res.status(500).render('error', { message: 'Error al cargar la lista de productos.' });
+        res.status(500).send({ status: 'error', message: error.message });
         req.logger.error(error.message);
     }
 }
 
-//ver detalles de un producto
+// Controlador para renderizar los detalles de un producto
 const renderDetails = async (req, res) => {
     try {
         const productId = req.params.productId;
-        const product = await products.getProductById(productId);
+        const product = await getProductByIdService(productId);
         if (!product) {
             return res.status(404).render('error', { message: 'Producto no encontrado.' });
         }
@@ -68,12 +50,12 @@ const renderDetails = async (req, res) => {
     }
 }
 
-//Ruta para mostrar un carrito específico con sus productos
+// Controlador para renderizar el carrito de compras
 const renderCart = async (req, res) => {
     const cartId = req.params.cid;
 
     try {
-        const cart = await carts.getById(cartId).populate('products.product');
+        const cart = await getCartByIdService(cartId).populate('products.product');
 
         if (!cart) {
             return res.status(404).render('error', { message: 'Carrito no encontrado.' });
@@ -95,42 +77,10 @@ const renderCart = async (req, res) => {
     }
 }
 
-//Ruta para añadir productos al carrito
-const addToCart = async (req, res) => {
-    try {
-        const { cartId, productId } = req.params;
-        const { quantity } = req.body;
-
-        const cart = await carts.getById(cartId);
-
-        if (!cart) {
-            return res.status(404).send('Cart not found');
-        }
-
-        const product = await products.getProductById(productId);
-
-        const productIndex = cart.products.findIndex(p => p.product.toString() === productId);
-
-        if (productIndex === -1) {
-            await carts.updateCart(cartId, product);
-        }
-        else {
-            await carts.updateProductQuantity(cartId, productId, quantity);
-        }
-
-        res.status(200).send({ message: 'Producto añadido al carrito', cartId: cart._id });
-
-    } catch (error) {
-        res.status(500).send('Error al añadir el producto al carrito.');
-        req.logger.error(error.message);
-    }
-}
-
 export {
+    renderHomePage,
     renderDetails,
-    renderProducts,
     renderCart,
-    addToCart,
     Register,
     Login
 }

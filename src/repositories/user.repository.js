@@ -1,3 +1,5 @@
+import UsersDto from "../DTOs/user.dto.js";
+
 export default class UserRepository {
     constructor(dao) {
         this.dao = dao;
@@ -25,7 +27,6 @@ export default class UserRepository {
         return result
     }
 
-
     updateUser = async (uid, user) => {
         let result = await this.dao.update(uid, user)
         return result
@@ -38,6 +39,16 @@ export default class UserRepository {
 
     deleteAllUsers = async () => {
         let result = await this.dao.delete()
+        return result
+    }
+
+    findInactiveUsers = async () => {
+        const result = await this.dao.findInactiveUsers();
+        return result;
+    }
+
+    uploadDocuments = async (user, documents) => {
+        const result = await this.dao.uploadDocuments(user, documents)
         return result
     }
 }

@@ -1,5 +1,7 @@
 import { fileURLToPath } from 'url';
-import { dirname, path } from 'path';
+import { dirname} from 'path';
+import path from 'path';
+import configs from './config/config.js';
 import multer from 'multer';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -10,6 +12,16 @@ let logger;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const generateTokenOneHour = (email) => {
+   try {
+      const token = jwt.sign({ email }, configs.privateKeyJwt, { expiresIn: '1h' });
+      return token;
+   } catch (error) {
+      console.error('generateToken error:', error);
+      throw error;
+   }
+}
 
 const authorization = (role) => {
     return async (req, res, next) => {
@@ -115,5 +127,6 @@ export {
    generateToken,
    generateProduct,
    addLogger,
-   uploader
+   uploader,
+   generateTokenOneHour
 }

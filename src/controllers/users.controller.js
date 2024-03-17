@@ -1,120 +1,110 @@
-import * as usersService from '../services/users.services.js';
-import { InvalidCredentials, UserAlreadyExists } from "../utils/custom.exceptions.js";
+import CustomError from '../errors/Custom.Error.js';
+import EErrors from '../errors/enums.js';
+import {
+    getUsers as GetUsersService,
+    getUserById as getUserByIdService,
+    changeUserRole as ChangeUserRoleService,
+    deleteUser as DeleteUserService,
+    cleanInactiveUsers as CleanInactiveUsersService,
+    uploadDocuments as uploadDocumentsServices
+} from '../services/users.services.js';
+import Users from '../dao/dbManagers/user.managers.js';
 
-const register = async (req, res) => {
+const userDao = new Users();
+
+// Controlador para obtener todos los usuarios
+const GetUsers = async (req, res) => {
     try {
-        const { first_name, last_name, role, email, password } = req.body;
-
-        if (!first_name || !last_name || !role || !email || !password) {
-            return res.sendClientError('incomplete values')
-        }
-
-        const result = await usersService.register({ ...req.body })
-
-        res.sendSuccessNewResourse(result);
+        const users = await GetUsersService();
+        res.send({ status: 'success', payload: users });
     } catch (error) {
+        res.status(500).send({ status: 'error', message: error.message });
         req.logger.error(error.message);
-
-        if (error instanceof UserAlreadyExists) {
-            return res.sendClientError(error.message);
-        }
-        res.sendServerError(error.message);
     }
 }
 
-const login = async (req, res) => {
+// Controlador para cambiar el rol de un usuario
+const ChangeUserRole = async (req, res) => {
     try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.sendClientError('incomplete values')
+        const { uid } = req.params;
+        const userRole = req.user.role;
+        if (userRole !== 'admin') {
+            throw CustomError.createError({
+                name: 'UserError',
+                cause: 'Permission denied',
+                message: 'You are not allowed to change user roles',
+                code: EErrors.PERMISSION_DENIED
+            });
         }
-
-        const accessToken = await usersService.login(password, email);
-
-        res.sendSuccess(accessToken);
+        const updatedUser = await ChangeUserRoleService(uid);
+        res.send({ status: 'success', payload: updatedUser });
     } catch (error) {
+        res.status(500).send({ status: 'error', message: error.message });
         req.logger.error(error.message);
-
-        if (error instanceof InvalidCredentials) {
-            return res.sendClientError(error.message);
-        }
-        res.sendServerError(error.message);
     }
 }
 
-const test = async (req, res) => {
-    console.log("test")
-    res.sendSuccess(accessToken);
+// Controlador para renderizar la vista de edición de usuarios
+const RenderEditUsers = async (req, res) => {
+    try {
+        const users = await userDao.get();
+        res.render('editUsers', { users });
+        console.log(req.user)
+    } catch (error) {
+        res.status(500).send({ status: 'error', message: error.message });
+        req.logger.error(error.message);
+    }
 }
 
-const changeRole = async (req, res) => {
+// Controlador para subir documentos del usuario
+const uploadDocuments = async (req, res) => {
     try {
-        let { uid } = req.params
-        let user = await usersService.getUserById(uid)
-        if (!user) return res.send({ message: "Unregistered user" })
+        const files = req.files
+        const { id } = req.params
+        const user = await getUserByIdService(id)
 
-         if (user.role === "user") {
-
-            if (user.documents.length === 5) {
-                user.role = "premium"
-            } else {
-                return res.status(400).json({ message: "You have not finished processing your documentation." })
-            }
-
+        const result = await uploadDocumentsServices(user, files)
+        return res.sendSuccess(result)
+    } catch (error) {
+        if (error instanceof UserNotFoundError) {
+            req.logger.error(`${error.message}`)
+            return res.sendNotFoundError(error.message)
         } else {
-            user.role = "user"
+            req.logger.fatal(`${error.message}`)
+            return res.sendServerError(error.message)
         }
-
-        await usersService.updateUser(user._id, user)
-
-        res.status(200).json({ message: "Role was changed successfully." })
-
-    } catch (error) {
-        res.status(400).json({ message: "Error when changing roles." })
     }
 }
 
-const uploadFields = async (req, res) => {
+
+// Controlador para eliminar un usuario
+const DeleteUser = async (req, res) => {
     try {
-        let { uid } = req.params
-        let user = await usersServices.getUserById(uid)
-        if (!user) return res.send({ message: "Unregistered user" })
-        if (!req.files) return res.send({ message: "Files not found." })
-
-        user.documents.push({
-            name: req.files['imagenPerfil'][0].originalname,
-            reference: req.files['imagenPerfil'][0].path,
-            status: "Ok"
-        }, {
-            name: req.files['imagenProducto'][0].originalname,
-            reference: req.files['imagenProducto'][0].path,
-            status: "Ok"
-        })
-
-        for (let i = 0; i < req.files['documents'].length; i++) {
-            let document = {
-                name: req.files['documents'][i].originalname,
-                reference: req.files['documents'][i].path,
-                status: "Ok"
-            }
-            user.documents.push(document)
-        }
-
-        if (user.documents.length === 5) user.role = "premium"
-        await usersService.updateUser(uid, user)
-
-        res.status(200).json({ message: "Archivos subidos correctamente. Su nivel de usuario se actualizó a premium." })
-
+        const userId = req.params.uid
+        const result = await DeleteUserService(userId);
+        res.send({ status: 'success', payload: result });
     } catch (error) {
-        res.status(400).json({ message: "Error al subir archivos" })
+        res.status(500).send({ status: 'error', message: error.message });
+        req.logger.error(error.message);
+    }
+}
+
+// Controlador para eliminar usuarios inactivos
+const CleanInactiveUsers = async (req, res) => {
+    try {
+        await CleanInactiveUsersService();
+        res.send({ status: 'success', message: 'Usuarios inactivos eliminados correctamente' });
+    } catch (error) {
+        res.status(500).send({ status: 'error', message: error.message });
+        req.logger.error(error.message);
     }
 }
 
 export {
-    login,
-    register,
-    test,
-    changeRole,
-    uploadFields
+    GetUsers,
+    ChangeUserRole,
+    RenderEditUsers,
+    DeleteUser,
+    CleanInactiveUsers,
+    uploadDocuments
 }

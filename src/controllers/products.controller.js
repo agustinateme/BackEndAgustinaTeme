@@ -1,8 +1,15 @@
-import { getProducts as getProductsService, getProductById as getProductByIdService, addProduct as addProductService, updateProduct as updateProductService, deleteProduct as deleteProductService } from '../services/products.services.js';
-import { productsServices, usersServices } from '../repositories/';
+import {
+    getProducts as getProductsService,
+    getProductById as getProductByIdService,
+    addProduct as addProductService,
+    updateProduct as updateProductService,
+    deleteProduct as deleteProductService
+} from '../services/products.services.js';
+import { getUserById } from '../services/users.services.js';
 import { generateProduct } from "../utils.js";
 import jwt from 'jsonwebtoken';
 
+// Controlador para obtener una lista paginada de productos
 const getProducts = async (req, res) => {
     try {
         let { limit = 10, page = 1, sort, query } = req.query;
@@ -31,6 +38,7 @@ const getProducts = async (req, res) => {
     }
 }
 
+// Controlador para obtener un producto por su ID
 const getProductById = async (req, res) => {
     try {
         const id = req.params.pid;
@@ -43,6 +51,7 @@ const getProductById = async (req, res) => {
     }
 }
 
+// Controlador para agregar un nuevo producto
 const addProduct = async (req, res) => {
     try {
         const product = req.body;
@@ -58,7 +67,7 @@ const addProduct = async (req, res) => {
        
             const { uid } = jwt.verify(token, "coder55575");
 
-            let resultUser = await usersServices.getUserById(uid);
+            let resultUser = await getUserById(uid);
             if (!resultUser) return res.status(400).json({ message: "User not found." });
             if (resultUser.email !== owner) return res.status(400).json({ message: "Owner doesnt exists." });
 
@@ -79,6 +88,7 @@ const addProduct = async (req, res) => {
     }
 }
 
+// Controlador para actualizar un producto existente
 const updateProduct = async (req, res) => {
     try {
 
@@ -101,6 +111,7 @@ const updateProduct = async (req, res) => {
     }
 }
 
+// Controlador para eliminar un producto existente
 const deleteProduct = async (req, res) => {
     try {
         const id = req.params.pid;
@@ -113,6 +124,7 @@ const deleteProduct = async (req, res) => {
     }
 }
 
+// Controlador para generar datos de productos ficticios (para propósitos de prueba)
 const mockingProducts = async (req, res) => {
     try {
         let products = [];

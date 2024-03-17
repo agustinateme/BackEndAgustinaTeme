@@ -5,6 +5,12 @@ export default class Products {
         console.log('Products database operations are ready.');
     }
 
+    // Filtra los productos
+    filterProducts = async (filter, options) => {
+        const products = await ProductsModel.find(filter).sort(options.sort).skip((options.page - 1) * options.limit).limit(options.limit);
+        return products;
+    }
+
     //Obtiene todos los productos
     getProducts = async () => {
         const products = await ProductsModel.find();

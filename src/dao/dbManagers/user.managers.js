@@ -29,8 +29,45 @@ export default class Users {
         return result;
     }
 
+    //Actualiza la ultima conección
+    updateLastConnection = async (userId, lastConnection) => {
+        return await usersModel.findByIdAndUpdate(userId, { last_connection: lastConnection });
+    }
+
     //Elimina todos los usuarios
     deleteAllUsers = async () => {
         usersModel.deleteMany();
     } 
+
+    //Encuentra usuarios inactivos
+    findInactiveUsers = async () => {
+        const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+        return await usersModel.find({ last_connection: { $lt: twoDaysAgo } }).lean();
+    }
+
+    //Actualiza los documentos de un usuario
+    uploadDocuments = async (user, documents) => {
+        const uid = user._id
+        for (const doc of documents) {
+            const existingDoc = await usersModel.findOne({
+                _id: uid,
+                "documents.name": doc.name
+            })
+
+            if (existingDoc) {
+                await usersModel.updateOne(
+                    { _id: uid, "documents.name": doc.name },
+                    { $set: { "documents.$.reference": doc.reference } }
+                )
+            } else {
+                await usersModel.updateOne(
+                    { _id: uid },
+                    { $addToSet: { documents: doc } }
+                )
+            }
+        }
+
+        const userUpdated = await usersModel.findById(uid).lean()
+        return userUpdated
+    }
 } 

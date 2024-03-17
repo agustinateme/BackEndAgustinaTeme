@@ -1,3 +1,4 @@
+// Configuración de Passport para autenticación local y de GitHub, así como estrategias JWT.
 import passport from "passport";
 import local from "passport-local";
 import GitHubStrategy from 'passport-github2';
@@ -5,18 +6,19 @@ import { usersModel } from "../dao/dbManagers/models/users.models.js";
 import configs from "./config.js";
 import jwt from 'passport-jwt';
 
-
 const JWTSrategy = jwt.Strategy;
 const ExtractJWT = jwt.ExtractJwt;
 
-
+// Inicialización de Passport
 const initializePassport = () => {
+    // Configuración de la estrategia de autenticación GitHub
     passport.use('github', new GitHubStrategy({
-        clientID: 'Iv1.e9e75a98f031935e',
-        clientSecret: 'e8a0d703ac42661b372d341509db1ad3b78c9eae',
+        clientID: configs.clientID,
+        clientSecret: configs.clientSecret,
         callbackURL: 'http://localhost:8080/api/sessions/github-callback',
         scope: ['user:email']
     }, async (accessToken, refreshToken, profile, done) => {
+        // Lógica para manejar la autenticación con GitHub
         try {
             console.log(profile);
             const email = profile.emails[0].value;
@@ -41,6 +43,8 @@ const initializePassport = () => {
         }
     }));
 
+
+    // Serialización y deserialización del usuario
     passport.serializeUser((user, done) => {
         done(null, user._id)
     });
@@ -51,6 +55,7 @@ const initializePassport = () => {
     })
 
 
+    // Configuración de la estrategia de autenticación JWT
     passport.use('jwt', new JWTSrategy({
         jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
         secretOrKey: configs.privateKeyJwt
@@ -63,6 +68,8 @@ const initializePassport = () => {
     }))
 };
 
+
+// Función para extraer el token JWT de las cookies de la solicitud
 const cookieExtractor = req => {
     let token = null;
     if (req && req.cookies) {
@@ -71,6 +78,7 @@ const cookieExtractor = req => {
     return token;
 }
 
+// Middleware de autenticación Passport
 const passportCall = (strategy) => {
     return async (req, res, next) => {
         passport.authenticate(strategy, { session: false }, function (err, user, info) {

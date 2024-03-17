@@ -1,3 +1,4 @@
+// Controlador para mostrar la información del usuario actualmente autenticado.
 import UserDto from "../DTOs/user.dto.js"
 
 const ShowUserInfo = async (req, res) => {
@@ -11,7 +12,6 @@ const ShowUserInfo = async (req, res) => {
         req.logger.error(error.message);
     }
 };
-
 
 export {
     ShowUserInfo

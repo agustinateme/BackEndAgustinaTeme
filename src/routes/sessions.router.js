@@ -1,76 +1,21 @@
 import { Router } from 'express';
-import { usersModel } from '../dao/dbManagers/models/users.models.js';
+import { Login, Logout, Register, MockUsers, Github, GitHubCallback } from '../controllers/sessions.controller.js';
 import passport from 'passport';
+import { handlePolicies } from "../middlewares/authJwt.js";
+import { passportCall } from "../config/passport.config.js";
 
 const router = Router();
 
-router.post('/register', async (req, res) => {
-    try {
-        const { first_name, last_name, email, age, password } = req.body;
+router.post('/register', passportCall(passportStrategiesEnum.NOTHING), handlePolicies([accessRolesEnum.PUBLIC]), Register);
 
-        if (!first_name || !last_name || !email || !age || !password) {
-            return res.status(422).send({ status: 'error', message: 'incomplete values' });
-        }
+router.post('/login', passportCall(passportStrategiesEnum.NOTHING), handlePolicies([accessRolesEnum.PUBLIC]), Login);
 
-        const exists = await usersModel.findOne({ email });
+router.get('/logout', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.ADMIN]), Logout);
 
-        if (exists) {
-            return res.status(400).send({ status: 'error', message: 'user already exists' });
-        }
+router.get('/github', passportCall(passportStrategiesEnum.GITHUB), handlePolicies([accessRolesEnum.PUBLIC]), passport.authenticate('github', { scope: ['user:email'] }), Github);
 
-        await usersModel.create({
-            first_name,
-            last_name,
-            email,
-            age,
-            password
-        })
+router.get('/github-callback', passportCall(passportStrategiesEnum.GITHUB), handlePolicies([accessRolesEnum.PUBLIC]), passport.authenticate('github', { failureRedirect: '/login' }), GitHubCallback);
 
-        res.status(201).send({ status: 'success', message: 'user registered' });
-    } catch (error) {
-        res.status(500).send({ status: 'error', message: error.message })
-    }
-});
-
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        const user = await usersModel.findOne({ email, password });
-
-        if (!user) {
-            return res.status(400).send({ status: 'error', message: 'incorrect credentials' });
-        }
-
-        req.session.user = {
-            name: `${user.first_name} ${user.last_name}`,
-            email: user.email,
-            age: user.age
-        }
-
-        res.send({ status: 'success', message: 'login success' })
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ status: 'error', message: error.message })
-    }
-});
-
-router.get('/logout', (req, res) => {
-    req.session.destroy(error => {
-        if (error) return res.status(500).send({ status: 'error', message: error.message });
-        res.redirect('/');
-    })
-})
-
-
-router.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => {
-    res.send({ status: 'success', message: 'user registered' });
-});
-
-router.get('/github-callback', passport.authenticate('github', { failureRedirect: '/login' }), async (req, res) => {
-    req.session.user = req.user;
-    res.redirect('/products');
-});
-
+router.get('/mockingproducts', MockUsers);
 
 export default router;

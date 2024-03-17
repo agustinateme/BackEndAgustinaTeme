@@ -1,33 +1,24 @@
-import Router from './router.js';
-import Products from '../dao/dbManagers/products.managers.js';
-import Carts from '../dao/dbManagers/carts.managers.js';
-import { renderProducts, renderDetails, renderCart, addToCart, Login, Register } from '../controllers/views.controller.js';
+import Router from 'express';
+import { renderProducts, renderDetails, renderHomePage, renderCart, Login, Register} from '../controllers/views.controller.js';
 import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
 
-export default class ViewsRouter extends Router {
-    constructor() {
-        super();
-        this.productsManager = new Products();
-        this.cartsManager = new Carts();
-    }
+const router = Router();
 
-    init() {
-        //Visualizar registro
-        this.get('/register', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, Register);
+// Visualizar registro
+router.get('/register', passportCall(passportStrategiesEnum.NOTHING), handlePolicies([accessRolesEnum.PUBLIC]), Register);
 
-        //Visualizar Logueo
-        this.get('/login', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, Login);
+// Visualizar Logueo
+router.get('/login', passportCall(passportStrategiesEnum.NOTHING), handlePolicies([accessRolesEnum.PUBLIC]), Login);
 
-        //Visualizar todos los productos con su respectiva paginación
-        this.get('/products', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, renderProducts);
+// Visualizar todos los productos con su respectiva paginación
+router.get('/products', passportCall(passportStrategiesEnum.JWT), handlePoliciesViews([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), renderProducts);
 
-        //Visualizar descripcion completa del producto seleccionado
-        this.get('/products/:productId', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, renderDetails);
+// Visualizar descripcion completa del producto seleccionado
+router.get('/products/:pid', passportCallViews(passportStrategiesEnum.JWT), handlePoliciesViews([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), renderDetails);
 
-        //Lista todos los productos del carrito seleccionado
-        this.get('/carts/:cid', [accessRolesEnum.USER], passportStrategiesEnum.NOTHING, renderCart);
+// Lista todos los productos del carrito seleccionado
+router.get('/carts/:cid', [accessRolesEnum.USER], passportStrategiesEnum.NOTHING, renderCart);
 
-        //Añade un producto al carrito
-        this.post('/carts/:cartId/products/:productId', [accessRolesEnum.USER], passportStrategiesEnum.NOTHING, addToCart);
-    }
-}
+// Visualizar home
+router.get('/', passportCall(passportStrategiesEnum.JWT), handlePoliciesViews([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), renderHomePage);
+
