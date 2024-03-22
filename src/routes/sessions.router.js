@@ -3,6 +3,8 @@ import { Login, Logout, Register, MockUsers, Github, GitHubCallback } from '../c
 import passport from 'passport';
 import { handlePolicies } from "../middlewares/authJwt.js";
 import { passportCall } from "../config/passport.config.js";
+import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
+
 
 const router = Router();
 

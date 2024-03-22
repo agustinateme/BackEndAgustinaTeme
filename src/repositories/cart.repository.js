@@ -1,8 +1,8 @@
-import { Carts as CartsDao } from "../dao/factory.js";
+import CartDto from '../DTOs/cart.dto.js';
 
 export default class CartRepository {
-    constructor() {
-        this.dao = new CartsDao();
+    constructor(dao) {
+        this.dao = dao;
     }
 
     //Devuelve todos los carritos

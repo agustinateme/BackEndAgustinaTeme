@@ -13,3 +13,5 @@ router.delete('/:uid', passportCall(passportStrategiesEnum.JWT), handlePolicies(
 router.post("/:uid/documents", passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), multerFields, uploadDocuments);
 router.delete('/', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.ADMIN]), CleanInactiveUsers);
 router.get('/:uid', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), RenderEditUsers);
+
+export default router;

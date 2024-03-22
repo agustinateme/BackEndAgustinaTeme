@@ -1,6 +1,6 @@
-import { jwt } from "jsonwebtoken";
 import configs from "../config/config.js";
 import { sendPasswordResetEmail as sendPasswordResetEmailService } from "../services/resetPassword.service.js";
+import jwt from "jsonwebtoken";
 
 const sendEmail = async (req, res) => {
     res.render('sendEmail');

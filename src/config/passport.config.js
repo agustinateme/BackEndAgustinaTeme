@@ -13,6 +13,7 @@ const ExtractJWT = jwt.ExtractJwt;
 const initializePassport = () => {
     // Configuración de la estrategia de autenticación GitHub
     passport.use('github', new GitHubStrategy({
+        
         clientID: configs.clientID,
         clientSecret: configs.clientSecret,
         callbackURL: 'http://localhost:8080/api/sessions/github-callback',
@@ -28,7 +29,7 @@ const initializePassport = () => {
                 const newUser = {
                     first_name: profile._json.name,
                     last_name: '',
-                    age: '',
+                    age: 18,
                     email,
                     password: ''
                 }

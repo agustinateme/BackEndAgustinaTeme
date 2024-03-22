@@ -1,7 +1,7 @@
 import usersServices from '../repositories/user.repository.js';
 import configs from '../config/config.js';
+import jwt from 'jsonwebtoken';
 
-const jwt = require('jsonwebtoken')
 
 const ROLES = ["user", "admin", "premium"];
 

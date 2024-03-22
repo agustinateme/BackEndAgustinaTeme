@@ -23,3 +23,5 @@ router.delete(':/pid', passportCall(passportStrategiesEnum.JWT), handlePolicies(
     
 //Mocking y manejo de errores
 router.get('/mockingproducts', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), mockingProducts);    
+
+export default router;

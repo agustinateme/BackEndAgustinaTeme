@@ -1,9 +1,10 @@
-import { Products as ProductsDao } from "../dao/factory.js";
+import ProductDto from '../DTOs/product.dto.js'
 
 // Clase que representa el repositorio de productos
 export default class ProductsRepository {
-    constructor() {
-        this.dao = new ProductsDao();
+    
+    constructor(dao) {
+        this.dao = dao;
     }
 
     // Filtra los productos

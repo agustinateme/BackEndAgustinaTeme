@@ -14,6 +14,7 @@ import errorHandler from "./middlewares/errors/index.js";
 import viewsResetPass from './routes/resetPassword.router.js';
 import { addLogger } from './utils.js';
 import configs from './config/config.js';
+import swaggerJsdoc from 'swagger-jsdoc';
 
 const app = express();
 initializePassport();
@@ -35,14 +36,14 @@ app.set('view engine', 'handlebars');
 
 //ROUTES
 app.use('/api/sessions', sessionsRouter);
-app.use('/api/users', UserRouter());
-app.use('/', ViewsRouter());
-app.use('/api/products', ProductsRouter());
-app.use('/api/carts', CartsRouter());
+app.use('/api/users', UserRouter);
+app.use('/', ViewsRouter);
+app.use('/api/products', ProductsRouter);
+app.use('/api/carts', CartsRouter);
 app.use('/current', currentRouter);
 app.use(addLogger);
 app.use('/loggerTest', loggerRouter);
-app.use('/api/reset', viewsResetPass());
+app.use('/api/reset', viewsResetPass);
 app.use(errorHandler);
 
 
@@ -50,19 +51,19 @@ app.listen(8080, () => console.log('Server running'));
 import cookieParser from 'cookie-parser';
 
 
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.1',
-    info: {
-      title: 'Documentacion proyecto backend ecommerce',
-      description: 'api de compra de productos.'
-    }
-  },
-  apis: [`${__mainDirname}/Docs/**/*.yaml`]
-}
-const specs = swaggerJsdoc(swaggerOptions);
+//const swaggerOptions = {
+  //definition: {
+    //openapi: '3.0.1',
+   // info: {
+    //  title: 'Documentacion proyecto backend ecommerce',
+     // description: 'api de compra de productos.'
+   // }
+  //},
+ // apis: [`${__dirname}/Docs/**/*.yaml`]
+//}
+//const specs = swaggerJsdoc(swaggerOptions);
 
-app.use('/api/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
+//app.use('/api/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 
 try {
   await mongoose.connect(configs.mongoUrl);
@@ -81,5 +82,5 @@ try {
 }
 
 const PORT = configs.port || 8080;
-
+console.log(PORT);
 app.listen(PORT, () => console.log(`listen server on port: ${PORT}`));

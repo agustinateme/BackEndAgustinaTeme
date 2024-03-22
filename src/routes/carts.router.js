@@ -5,6 +5,7 @@ import { processPurchase } from "../controllers/tickets.controller.js";
 import { passportCall } from '../config/passport.config.js';
 import { handlePolicies } from '../middlewares/authJwt.js';
 
+
 const router = Router();
 
 //Crea un nuevo carrito
@@ -31,3 +32,4 @@ router.delete('/:cid', passportCall(passportStrategiesEnum.JWT), handlePolicies(
 //Finalizar proceso de compra de dicho carrito
 router.post('/:cid/purchase', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER]), processPurchase);
 
+export default router;

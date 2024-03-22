@@ -9,7 +9,12 @@ const Register = async (req, res) => {
 
 // Controlador para renderizar la página de inicio de sesión
 const Login = async (req, res) => {
-    res.render('login')
+    try {
+        res.render('login');
+    } catch (error) {
+        res.sendServerError(error.message);
+        req.logger.error(error.message);
+    }
 }
 
 // Controlador para renderizar la página de inicio con productos
