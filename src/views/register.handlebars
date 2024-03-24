@@ -20,32 +20,35 @@
     </form>
     <p>Ya tienes cuenta? <a href="/login">Ingresa aquí</a></p>
 </div>
-<script >
+<script>
     const form = document.getElementById('registerForm');
 
-    form.addEventListener('submit', e => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = new FormData(form);
         const obj = {};
 
         data.forEach((value, key) => obj[key] = value);
-        
-        fetch('/api/sessions/register', {
-            method: 'POST',
-            body: JSON.stringify(obj),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(result => {
+
+        try {
+            const response = await fetch('/api/sessions/register', {
+                method: 'POST',
+                body: JSON.stringify(obj),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
             console.log('Después de la llamada a fetch');
-            if (result.status === 201) {
+
+            if (response.status === 201) {
                 console.log('Redirigiendo a /login');
                 window.location.replace('/login');
             } else {
-                console.log('Error en el servidor:', result.status);
+                console.log('Error en el servidor:', response.status);
             }
-        }).catch(error => {
+        } catch (error) {
             console.error('Error en la llamada a fetch:', error);
-        });
-    })
+        }
+    });
 </script>
