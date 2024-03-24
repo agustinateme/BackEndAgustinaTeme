@@ -18,7 +18,7 @@ const handlePolicies = (policies) => (req, res, next) => {
 
 const verifyToken = async (req, res, next) => {
     try {
-        const token = req.cookies["jwtCookie"]
+        const token = req.cookies["coderCookieToken"]
         if (!token) return res.status(403).json({ status: "error", error: "Token no provided." })
 
         let decoded = jwt.verify(token, configs.privateKeyJwt);

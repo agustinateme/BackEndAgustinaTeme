@@ -1,4 +1,7 @@
 import express from 'express';
+import mongoose from 'mongoose';
+import MongoStore from 'connect-mongo';
+import session from 'express-session';
 import handlebars from 'express-handlebars';
 import {initializePassport} from './config/passport.config.js';
 import { __dirname } from './utils.js';
@@ -14,11 +17,30 @@ import errorHandler from "./middlewares/errors/index.js";
 import viewsResetPass from './routes/resetPassword.router.js';
 import { addLogger } from './utils.js';
 import configs from './config/config.js';
+import cookieParser from 'cookie-parser';
 import swaggerJsdoc from 'swagger-jsdoc';
 
 const app = express();
-initializePassport();
 app.use(cookieParser());
+
+try {
+  await mongoose.connect(configs.mongoUrl);
+  console.log('DB connected');
+  app.use(session({
+    store: MongoStore.create({
+      client: mongoose.connection.getClient(),
+      ttl: 3600
+    }),
+    secret: configs.sessionSecret,
+    resave: true,
+    saveUninitialized: true,
+  }));
+} catch (error) {
+  console.log(error.message);
+}
+
+initializePassport();
+
 
 //passport
 app.use(passport.initialize());
@@ -48,7 +70,8 @@ app.use(errorHandler);
 
 
 app.listen(8080, () => console.log('Server running'));
-import cookieParser from 'cookie-parser';
+
+
 
 
 //const swaggerOptions = {
@@ -65,22 +88,7 @@ import cookieParser from 'cookie-parser';
 
 //app.use('/api/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 
-try {
-  await mongoose.connect(configs.mongoUrl);
-  console.log('DB connected');
-  app.use(session({
-    store: MongoStore.create({
-      client: mongoose.connection.getClient(),
-      ttl: 3600
-    }),
-    secret: configs.sessionSecret,
-    resave: true,
-    saveUninitialized: true,
-  }));
-} catch (error) {
-  console.log(error.message);
-}
+
 
 const PORT = configs.port || 8080;
-console.log(PORT);
 app.listen(PORT, () => console.log(`listen server on port: ${PORT}`));

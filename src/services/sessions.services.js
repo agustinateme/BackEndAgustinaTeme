@@ -9,8 +9,7 @@ const userDao = new Users();
 const userRepository = new UserRepository(userDao)
 
 const Register = async (first_name, last_name, age, role, email, password) => {
-    const user = await userRepository.getUserByEmail(email);
-    console.log(user);
+    const user = await userRepository.getByEmail(email);
 
     if (!user) {
         const cart = await CartsModel.create({ products: [] });
@@ -31,7 +30,7 @@ const Register = async (first_name, last_name, age, role, email, password) => {
 }
 
 const Login = async (email, password) => {
-    const user = await userRepository.getUserByEmail(email);
+    const user = await userRepository.getByEmail(email);
     if (user || isValidPassword(password, user.password)) {
         const { password: _, ...userResult } = user;
         const accessToken = generateToken(userResult);

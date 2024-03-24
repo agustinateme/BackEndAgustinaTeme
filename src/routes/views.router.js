@@ -1,4 +1,4 @@
-import Router from 'express';
+import { Router } from 'express';
 import { renderDetails, renderHomePage, renderCart, Login, Register} from '../controllers/views.controller.js';
 import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
 import { passportCall } from '../config/passport.config.js';
@@ -7,10 +7,10 @@ import { handlePolicies } from '../middlewares/authJwt.js';
 const router = Router();
 
 // Visualizar registro
-router.get('/register', passportCall(passportStrategiesEnum.NOTHING), handlePolicies([accessRolesEnum.PUBLIC]), Register);
+router.get('/register',  Register);
 
 // Visualizar Logueo
-router.get('/login', passportCall(passportStrategiesEnum.NOTHING), handlePolicies([accessRolesEnum.PUBLIC]), Login);
+router.get('/login', Login);
 
 // Visualizar todos los productos con su respectiva paginación
 router.get('/products', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN]), renderHomePage);

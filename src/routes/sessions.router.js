@@ -8,9 +8,9 @@ import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.js';
 
 const router = Router();
 
-router.post('/register', passportCall(passportStrategiesEnum.NOTHING), handlePolicies([accessRolesEnum.PUBLIC]), Register);
+router.post('/register', Register);
 
-router.post('/login', passportCall(passportStrategiesEnum.NOTHING), handlePolicies([accessRolesEnum.PUBLIC]), Login);
+router.post('/login', Login);
 
 router.get('/logout', passportCall(passportStrategiesEnum.JWT), handlePolicies([accessRolesEnum.USER, accessRolesEnum.ADMIN]), Logout);
 
